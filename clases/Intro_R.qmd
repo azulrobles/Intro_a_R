@@ -1,0 +1,938 @@
+---
+title: "Intro_R"
+format: pdf
+editor: visual
+---
+
+## Introducción a R y organización de proyectos bioinformáticos
+
+```{r}
+# Borrar memoria 
+rm(list = ls())
+
+# Directorio de trabajo 
+getwd()
+
+# 2.8.1 Ejemplo código 
+a <- 2
+b <- 3
+suma <- a + b
+suma
+```
+
+### 2.9.2 Instalar librerías: CRAN
+
+```{r}
+# install.packages("tidyverse")
+```
+
+### 2.9.3 Instalar librerías: Bioconductor
+
+```{r}
+# install.packages("BiocManager") # Esto es necesario solo 1 vez
+```
+
+### 2.9.5 Eliminación de paquetes
+
+```{r}
+# remove.packages("package-to-remove")
+```
+
+### 2.9.6 Cargar paquetes en el ambiente de R
+
+```{r}
+library(ggplot2)
+```
+
+### 2.9.7 Verificar paquetes instalados y sus versiones
+
+```{r}
+# "ggplot2" %in% rownames(installed.packages())
+# packageVersion("ggplot2")
+# installed.packages()[, c("Package", "Version")]
+# help(package = "ggplot2")
+# ?plot
+```
+
+### 2.9.8 Actualizar paquetes
+
+```{r}
+# update.packages(ask = TRUE) 
+```
+
+### 2.9.9 Instalación de una versión específica de un paquete
+
+```{r}
+# Instalar paquertería  
+# install.packages("remotes")
+
+# Instalar versión deseada 
+# remotes::install_version(
+#  "dplyr",
+#  version = "1.1.4",
+#  repos = "https://cloud.r-project.org"
+# ) 
+
+# Verificar que se instaló 
+packageVersion("dplyr")
+```
+
+## 3. Objetos y estructuras de datos en R
+
+### 3.1 Asignación, nombres y tipos básicos
+
+| **Clases**  | **Declaración de la variable** | **Conversión de formato** |
+|:-----------:|:------------------------------:|:-------------------------:|
+|  `numeric`  |          `numeric()`           |      `as.numeric()`       |
+|  `integer`  |          `integer()`           |      `as.integer()`       |
+|  `double`   |           `double()`           |       `as.double()`       |
+| `character` |         `character()`          |     `as.character()`      |
+|  `logical`  |          `logical()`           |      `as.logical()`       |
+|  `factor`   |           `factor()`           |       `as.factor()`       |
+
+NOTA: `as.integer()` convierte los numeros a enteros. Ejemplo: as.integer(2.5) = 2. En cambio, `as.double()` permite que los numeros contengan decimales.
+
+Asignación:
+
+```{r}
+identificador <- "gene_001"
+longitud <- 450L
+proporcion_gc <- 0.53
+anotado <- TRUE
+```
+
+Conocer class, typeof y str:
+
+```{r}
+# class 
+class(identificador) 
+class(longitud)
+class(proporcion_gc) 
+class(anotado) 
+class(1.5)
+
+# typeof 
+typeof(1.5)
+
+# str 
+str(identificador) 
+```
+
+### 3.2 Principales estructuras de datos en R
+
+| **Estructura** | **Dimensión** | **Homogeneidad** | **Ejemplo** | **Uso típico** |
+|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
+| **Vector** | 1D | Homogénea (todos del mismo tipo) | `c(1,2,3)` | Secuencias simples de números, caracteres o lógicos |
+| **Lista** | 1D | Heterogénea (puede mezclar tipos) | `list(a=1:3, b="hola")` | Agrupar objetos distintos, resultados de modelos |
+| **Matriz** | 2D | Homogénea | `matrix(1:6, nrow=2)` | Cálculos numéricos, álgebra lineal |
+| **Array** | nD (más de 2 dimensiones) | Homogénea | `array(1:8, dim=c(2,2,2))` | Datos multidimensionales, imágenes, series temporales |
+| **Data frame** | 2D | Heterogénea (cada columna puede ser de distinto tipo) | `data.frame(x=1:3, y=c("a","b","c"))` | Datos tabulares, análisis estadístico |
+| **Tibble** | 2D | Heterogénea | `tibble(x=1:3, y=c("a","b","c"))` | Variante moderna de data frame, impresión más clara |
+
+### 3.2.1 Vectores e indexación
+
+```{r}
+genes <- c("gA", "gB", "gC", "gD")
+longitudes <- c(150, 400, 220, 510)
+
+length(genes)
+
+genes[1]
+genes[c(2, 4)]
+genes[longitudes >= 300]
+longitudes / 3
+longitudes >= 300
+sum(longitudes >= 300)
+```
+
+## **Ejercicio 1. Vectores y selecciónPregunta**
+
+```{r}
+# creando vectores 
+ids <- c("g1", "g2", "g3", "g4", "g5") 
+tam <- c(90, 450, 310, 120, 600) 
+
+# 1. Seleccionamos tercer identificador 
+ids[3]
+
+# 2. Recuperamos los ids de genes con long >= 300 
+ids[tam >= 300] 
+
+# 3. Contar cuántos cumplen esa condición sin usar ciclo 
+sum(tam >= 300)
+```
+
+```{r}
+valores <- c("12", "18", "sin_dato", "NA")
+# La conversión produce una advertencia; no la ejecutamos automáticamente
+# as.numeric(valores) 
+```
+
+```{r}
+# O podemos preguntar directamente si hay valores faltantes en un vector.
+is.na(c(10, NA, 20)) 
+```
+
+### 3.2.2 Matrices y arreglos
+
+```{r}
+conteos <- matrix(
+  c(12, 8, 4, 6, 10, 2),
+  nrow = 3,
+  dimnames = list(c("g1", "g2", "g3"), c("M1", "M2"))
+)
+conteos
+
+# extraer posición 
+conteos[2, 1]
+conteos[, "M2"] 
+
+# para conocer dimensión 
+dim(conteos)
+
+# crear arreglo y ver dimensión 
+arreglo <- array(1:8, dim = c(2, 2, 2))
+dim(arreglo) 
+```
+
+### 3.2.3 Data frames y tibbles
+
+```{r}
+# creando dataframe 
+anotaciones <- data.frame(
+  gen = c("g1", "g2", "g3"),
+  longitud = c(450, 120, 800),
+  producto = c("transportador", "hipotetica", "enzima")
+)
+
+anotaciones 
+
+# integridad de mi dataframe 
+str(anotaciones) 
+
+# extraer columna 
+anotaciones$longitud 
+
+# extraer fila 2 
+anotaciones[2, ] 
+
+# extrae las filas en las que la long fue mayor a 200
+anotaciones[anotaciones$longitud > 200, ] 
+```
+
+Un **tibble** es una variante moderna de `data.frame`, con una impresión más compacta y comportamientos de selección más consistentes.
+
+```{r}
+# Requiere haber instalado tibble
+# tibble::as_tibble(anotaciones)
+```
+
+### 3.2.4 Listas y factores
+
+Las **listas** pueden almacenar objetos de distintos tipos y tamaños. Resultan útiles para reunir resultados de un análisis.
+
+```{r}
+# creando lista 
+muestra <- list(
+  id = "M01",
+  secuencias = c("ATGCGT", "CCATGA"),
+  anotaciones = anotaciones
+)
+
+# Extraer la lista, es un vector
+muestra$id
+muestra[["secuencias"]] # es lo mismo que lo de arriba 
+
+# Conserva la estructura de una lista
+muestra["secuencias"] 
+```
+
+Un **factor** representa categorías con niveles definidos. Su orden puede importar al crear tablas o gráficos.
+
+```{r}
+# creamos un factor y la guardamos en variable 
+condicion <- factor(c("control", "tratamiento", "control"),
+                    levels = c("control", "tratamiento"))
+
+# niveles del factor 
+levels(condicion)
+```
+
+## **Ejercicio 2: Factores**
+
+Crea una vector con las letras `A M A B M M B A B B`, donde `A` significa Alto, `B` bajo y `M` medio. Convierte las entradas del vector a factores y especifica que `A > M > B`.
+
+```{r}
+# creando vector 
+datos <- c("A", "M", "A", "B", "M", "M", "B", "A", "B", "B") 
+# convertir a factor 
+fac <- factor(datos, 
+              levels = c("B", "M", "A"),
+              labels = c("Bajo", "Medio", "Alto"),
+              ordered = TRUE) 
+fac 
+# se ordena de menor a mayor 
+```
+
+### 3.2.5 Resumen de tipos de objetos
+
+| **Estructura** | **Dimensiones** | **¿Elementos del mismo tipo?** | **Ejemplo de uso** |
+|:----------------:|:----------------:|:----------------:|:----------------:|
+| Vector | 1 | Sí | Identificadores o longitudes |
+| Matriz | 2 | Sí | Conteos por gen y muestra |
+| Array | 2 o más | Sí | Datos multidimensionales |
+| Data frame / tibble | 2 | Por columna | Tabla de anotaciones |
+| Lista | Variable | No | Resultados heterogéneos |
+
+## **Ejercicio 3. Elegir estructuras**
+
+1.  Construye un `data.frame` con tres genes, sus longitudes y una etiqueta funcional.
+
+2.  Recupera únicamente las filas con longitud mayor que 200.
+
+3.  Crea una lista que contenga la tabla y el identificador de una muestra.
+
+4.  Explica por qué una matriz de caracteres no sería una buena sustitución para la tabla cuando queremos conservar longitudes numéricas.
+
+```{r}
+# creamos data.frame 
+data <- data.frame(
+  genes = c("BRCA1", "TP53", "BRCA2"),
+  long = c(100, 230, 121),
+  funcion = c("Supresor tumoral", "guardián", "Supresor tumoral")
+)
+
+# Recuperamos las filas con long mayor que 200 
+filtrado <- data[data$long >= 200, ] 
+
+# Creamos lista con tabla e identificador de una muestra 
+info_lista <- list(
+  tabla = filtrado,
+  muestra = "0-11"
+)
+print(info_lista)
+```
+
+### 3.3 Operadores
+
+| **Aritméticos** | **Comparación** | **Argumentos lógicos (Logical Operators)** |
+|:----------------------:|:----------------------:|:----------------------:|
+| `+` Adición / suma | `<` Menor que | `!x` - Not x (logical NOT) |
+| `-` Sustracción / resta | `>` Mayor que | `x & y` OR `x AND y` - (logical AND) |
+| `*` Multiplicación | `<=` Menor o igual que | `x && y` - identico |
+| `/` OR %% División | `>=` Mayor o igual que | `xor(x,y)` Funcion OR |
+| `^` OR \*\* Exponencial | `==` Igual a | `%in%` pertenece a |
+| `%/%` División integral | `!=` Diferente de |  |
+
+Otra forma de escribir OR es `x | y` OR `x || y`.
+
+### 3.3.1 Jerarquía de operaciones
+
+|     |                   |
+|-----|-------------------|
+| 1   | `^`               |
+| 2   | `* /`             |
+| 3   | `+ -`             |
+| 4   | `< > <= >= == !=` |
+| 5   | `!`               |
+| 6   | `&`               |
+| 7   | OR                |
+
+## 4  Estructuras de control
+
+### 4.1 Condicionales: `if`, `else if` y `else`
+
+```{r}
+# creando variables 
+secuencia <- "ATGCGT"
+longitud <- nchar(secuencia)
+
+# usando condicional if 
+if (longitud >= 10) {
+  print("La secuencia tiene al menos 10 nucleótidos")
+} 
+
+if (longitud >= 10) {
+  print("La secuencia tiene al menos 10 nucleótidos")
+} else {
+  print("La secuencia tiene menos de 10 nucleótidos")
+} 
+
+# usando else if 
+if (longitud >= 20) {
+  print("Secuencia larga")
+} else if (longitud >= 10) {
+  print("Secuencia mediana")
+} else {
+  print("Secuencia corta")
+} 
+```
+
+### 4.1.1 Validación de valores y condicionales anidados
+
+```{r}
+# variable 
+valor <- -3 
+
+# if anidado 
+if (is.na(valor)) {
+  print("El valor está ausente")
+} else {
+  if (valor < 0) {
+    print("Es negativo")
+  } else if (valor > 0) {
+    print("Es positivo")
+  } else {
+    print("Es cero")
+  }
+}
+
+# sin anidamiento 
+if (is.na(valor)) {
+  print("El valor está ausente")
+} else if (valor < 0) {
+  print("Es negativo")
+} else if (valor > 0) {
+  print("Es positivo")
+} else {
+  print("Es cero")
+} 
+```
+
+## **Ejercicio 1. Clasificación de un valor**
+
+Define una variable `conteo` que represente el número de lecturas asignadas a un gen. Escribe un condicional que imprima:
+
+- `"Dato faltante"` si el valor es `NA`.
+
+- `"Conteo inválido"` si es negativo.
+
+- `"Sin lecturas"` si es cero.
+
+- `"Con lecturas"` si es positivo.
+
+Prueba tu código con `NA`, `-2`, `0` y `15`.
+
+```{r}
+conteo <- 5  
+ 
+if (is.na(conteo)) {
+  print("Dato faltante")
+} else if (conteo < 0) {
+  print("Conteo invalido")
+} else if (conteo == 0) {
+  print("Sin lecturas")
+} else {
+  print("Con lecturas")
+}
+```
+
+### 4.1.2 Condiciones sobre vectores: `ifelse()`, `all()`, `any()` y `which()`
+
+La función `ifelse()` evalúa una condición **elemento por elemento** y devuelve un resultado de acuerdo con si cada elemento satisface la condición.
+
+```{r}
+conteos <- c(0, 12, 4, 0, 25)
+
+estado <- ifelse(conteos > 0, "Detectado", "No detectado")
+estado 
+```
+
+En cambio, `all()`, `any()` y `which()` resumen o localizan los resultados de comparaciones lógicas:
+
+```{r}
+conteos <- c(0, 12, 4, 0, 25)
+
+# all
+all(conteos >= 0)  # ¿Todos los conteos son no negativos? 
+
+# any 
+any(conteos == 0)  # ¿Existe al menos un cero?
+
+# which 
+which(conteos == 0) # ¿En qué posiciones hay ceros?
+```
+
+## **Ejercicio 2. Verificación de conteos**
+
+Considera el vector `conteos <- c(8, 0, 13, 5, 0, 21)`. Utiliza las funciones anteriores para:
+
+1.  Verificar si todos los valores son no negativos.
+
+2.  Determinar si existe al menos un conteo mayor que 20.
+
+3.  Obtener las posiciones de los conteos iguales a cero.
+
+4.  Crear un vector que indique `"Presente"` o `"Ausente"` según si el conteo es mayor que cero.
+
+```{r}
+# creando vector 
+conteos <- c(8, 0, 13, 5, 0, 21) 
+
+# verificando si todos los valores son negativos 
+all(conteos == 0) 
+
+# determinar si existe al menos un conteo mayor que 20 
+any(conteos > 20) 
+
+# obtener posiciones de conteos = 0 
+which(conteos == 0) 
+
+# creando vector que indique Presente o Ausente si conteo es mayor a 0 
+estado <- ifelse(conteos > 0, "Presente", "Ausente") 
+estado 
+```
+
+### 4.2 Ciclo `for`
+
+```{r}
+#for (elemento in coleccion) {
+  # Instrucciones que se ejecutan para cada elemento
+#}
+
+# ejemplo de recorrer los números del 1 al 5 
+for (i in 1:5) {
+  print(i)
+}
+```
+
+### 4.2.1 Recorrer secuencias biológicas
+
+```{r}
+secuencias <- c("ATGC", "ATGCGT", "CCATGAA")
+
+for (secuencia in secuencias) {
+  print(nchar(secuencia))
+}
+# nchar cuenta carácteres 
+
+# para guardar las longitudes 
+longitudes <- numeric(length(secuencias))
+
+for (i in seq_along(secuencias)) {
+  longitudes[i] <- nchar(secuencias[i])
+}
+
+longitudes
+```
+
+Aquí `seq_along(secuencias)` genera las posiciones del vector.
+
+### 4.2.2 Combinar `for` e `if`
+
+```{r}
+secuencias <- c("ATGC", "ATGCGT", "CCATGAA")
+
+for (secuencia in secuencias) {
+  if (nchar(secuencia) >= 6) {
+    print("Longitud de al menos 6 nucleótidos")
+  } else {
+    print("Longitud menor que 6 nucleótidos")
+  }
+} 
+```
+
+## **Ejercicio 3. Longitudes de secuencias**
+
+1.  Utiliza un ciclo `for` para guardar las longitudes en un vector llamado `longitudes`.
+
+2.  Crea otro vector llamado `clasificacion` que contenga `"Corta"` para longitudes menores que 5 y `"Larga"` para longitudes de al menos 5.
+
+3.  Muestra ambos vectores.
+
+```{r}
+# creando vector 
+secuencias <- c("ATG", "ATGCGT", "AATTCCGG", "CG") 
+
+# usar ciclo for para guardar longs 
+longitudes <- numeric(length(secuencias))
+
+for (i in seq_along(secuencias)) {
+  longitudes[i] <- nchar(secuencias[i])
+} 
+
+longitudes 
+
+# vector de clasificacion 
+clasificacion <- ifelse(longitudes < 5, "Corta", "Larga")
+clasificacion
+```
+
+### 4.3 Ciclo `while`
+
+`while` repite un bloque de instrucciones **mientras una condición sea verdadera**.
+
+```{r}
+#while (condicion) {
+  # Instrucciones que se repiten mientras la condición sea TRUE
+# } 
+
+i <- 0
+
+while (i < 5) {
+  print(i)
+  i <- i + 1
+}
+
+# evitar ciclos infinitos 
+i <- 0
+while (i < 5) {
+  print(i)
+  i <- i + 1
+} 
+```
+
+### 4.3.1 Ejemplo: encontrar un umbral
+
+Queremos encontrar el primer entero positivo cuyo cuadrado sea mayor que 50:
+
+```{r}
+limite <- 50
+numero <- 0
+
+while (numero^2 <= limite) {
+  numero <- numero + 1
+}
+
+numero
+numero^2
+```
+
+### 4.3.2 Ejemplo: recorrer progresivamente una secuencia
+
+```{r}
+secuencia <- "ATGCGT"
+posicion <- 1
+fragmentos <- character(nchar(secuencia))
+
+while (posicion <= nchar(secuencia)) {
+  fragmentos[posicion] <- substr(secuencia, 1, posicion)
+  posicion <- posicion + 1
+}
+
+fragmentos
+```
+
+La función `substr(secuencia, 1, posicion)` extrae los caracteres comprendidos entre las posiciones indicadas.
+
+## **Ejercicio 4. Alcanzar una longitud**
+
+Imagina que estamos construyendo una secuencia mediante la adición de un nucleótido `"A"` en cada iteración. Escribe un ciclo `while` que comience con una cadena vacía y se detenga cuando la secuencia alcance **8 nucleótidos**. Muestra el resultado final.
+
+```{r}
+sec <- "" 
+
+while (nchar(sec) < 8) {
+  sec <- paste0(sec, "A")
+}
+
+sec
+nchar(sec)
+```
+
+- **`length(x)`** devuelve el número de elementos de un vector o una lista.
+
+- **`nchar(x)`** devuelve el número de caracteres de una cadena de texto.
+
+```{r}
+secuencia <- "ATGCGTA"
+
+length(secuencia)
+nchar(secuencia)
+```
+
+### 4.4 ¿Cuándo utilizar cada estructura?
+
+| **Estructura** | **¿Para qué sirve?** | **Ejemplo de aplicación** |
+|:----------------------:|:----------------------:|:----------------------:|
+| `if` / `else` | Elegir entre alternativas a partir de una condición única. | Verificar si un conteo es válido. |
+| `ifelse()` | Clasificar elementos de un vector. | Etiquetar conteos positivos y ceros. |
+| `for` | Recorrer una colección de elementos. | Calcular la longitud de varias secuencias. |
+| `while` | Repetir hasta que deje de cumplirse una condición. | Construir una secuencia hasta alcanzar una longitud. |
+
+## 5  Funciones en R
+
+Una función recibe **argumentos**, ejecuta instrucciones y devuelve un **resultado**. En R se construye con `function()` y se asigna a un nombre mediante `<-`.
+
+```{r}
+#nombre_funcion <- function(argumentos) {
+  # Instrucciones
+#  resultado
+#}
+```
+
+### 5.1 Crear y utilizar una función
+
+```{r}
+longitud_adn <- function(secuencia) {
+  longitud <- nchar(secuencia)
+  return(longitud)
+}
+
+longitud_adn("ATGCGTAA")
+longitud_adn("CCGTA")
+
+# sin return 
+longitud_adn <- function(secuencia) {
+  nchar(secuencia)
+}
+
+longitud_adn("ATGCGTAA")
+```
+
+### 5.1.1 Funciones con varios argumentos
+
+```{r}
+# usando grepl 
+contiene_motivo <- function(secuencia, motivo) {
+  grepl(motivo, secuencia, fixed = TRUE)
+}
+
+contiene_motivo("ATGCGTAA", "CGT")
+contiene_motivo("ATGCGTAA", "GGG")
+```
+
+El argumento `fixed = TRUE` indica que buscamos el motivo como texto literal, sin interpretarlo como una expresión regular. La función devuelve `TRUE` o `FALSE`.
+
+## **Ejercicio 1: Función 1**
+
+Escribe una función llamada `empieza_con` que reciba una secuencia y un prefijo, y determine si la secuencia comienza con ese prefijo. Pruébala con `"ATGCGT"` y los prefijos `"ATG"` y `"TGA"`.
+
+```{r}
+empieza_con <- function(secuencia, prefijo) {
+  startsWith(secuencia, prefijo)
+} 
+empieza_con("ATGCGT", "ATG")
+empieza_con("ATGCGT", "TGA")
+```
+
+### 5.2 Argumentos con valores predeterminados
+
+```{r}
+preparar_secuencia <- function(secuencia, tipo = "ADN", mayusculas = TRUE) {
+  if (mayusculas) {
+    secuencia <- toupper(secuencia)
+  }
+  
+  if (tipo == "ARN") {
+    secuencia <- chartr("T", "U", secuencia)
+  }
+  
+  secuencia
+}
+
+preparar_secuencia("atgcgt")
+preparar_secuencia("atgcgt", tipo = "ARN")
+preparar_secuencia("atgcgt", mayusculas = FALSE)
+preparar_secuencia("atgcgt", tipo = "ARN", mayusculas = TRUE)
+```
+
+### 5.3 Devolver varios resultados mediante una lista
+
+Supongamos que queremos resumir una secuencia de ADN mediante su identificador, longitud y número de nucleótidos `G` y `C`.
+
+```{r}
+resumir_adn <- function(id, secuencia) {
+  secuencia <- toupper(secuencia)
+  bases <- strsplit(secuencia, split = "", fixed = TRUE)[[1]]
+  
+  list(
+    id = id,
+    longitud = nchar(secuencia),
+    conteo_gc = sum(bases %in% c("G", "C"))
+  )
+}
+
+resultado <- resumir_adn("GEN_01", "ATGCGTAA")
+resultado 
+
+resultado$id
+resultado[["longitud"]]
+```
+
+## **Ejercicio 2: Función 2**
+
+Modifica `resumir_adn()` para que también devuelva la proporción de nucleótidos `G` y `C` respecto de la longitud total. Prueba la función con una secuencia no vacía.
+
+```{r}
+resumir_adn <- function(id, secuencia) {
+  secuencia <- toupper(secuencia)
+  bases <- strsplit(secuencia, "", fixed = TRUE)[[1]]
+  longitud <- nchar(secuencia)
+  conteo_gc <- sum(bases %in% c("G", "C")) 
+  proporcion_gc <- conteo_gc/longitud
+  
+  list(
+    id = id,
+    longitud = longitud,
+    conteo_gc = conteo_gc,
+    proporcion_gc = proporcion_gc
+  )
+}
+
+resumir_adn("GEN_01", "ATGCGTAA")
+```
+
+### 5.4 Validar argumentos: `stop()` y `stopifnot()`
+
+```{r}
+validar_adn <- function(secuencia) {
+  if (!is.character(secuencia) ||
+      length(secuencia) != 1 ||
+      is.na(secuencia) ||
+      !grepl("^[ACGT]+$", toupper(secuencia))) {
+    stop("Se requiere una secuencia no vacía con bases A, C, G o T.")
+  }
+  
+  TRUE
+}
+
+validar_adn("ATGCGT")
+# validar_adn("ATNG")  # Error: contiene N
+# validar_adn(1234)    # Error: no es texto
+```
+
+En esta función, `^[ACGT]+$` es una **expresión regular**: exige que todos los caracteres sean `A`, `C`, `G` o `T`, y que exista al menos uno.
+
+```{r}
+longitud_validada <- function(secuencia) {
+  stopifnot(
+    is.character(secuencia),
+    length(secuencia) == 1,
+    !is.na(secuencia)
+  )
+  
+  nchar(secuencia)
+}
+
+
+longitud_validada("ATGCGT")
+```
+
+### 5.5 Combinar funciones y estructuras de control
+
+```{r}
+revisar_secuencias <- function(secuencias) {
+  # Creamos el vector de resultados lógico (FALSE) de longitud n
+  resultado <- logical(length(secuencias))
+  
+  for (i in seq_along(secuencias)) {
+    # Extraemos la secuencia i y la guardamos en secuencia temporalmente
+    secuencia <- secuencias[i]
+    
+    if (is.na(secuencia)) {
+      # si es vacía asignamos FALSE
+      resultado[i] <- FALSE
+    } else {
+      # si no es vacía, verificamos que silo contenga A, C, G o T
+      resultado[i] <- grepl("^[ACGT]+$", toupper(secuencia))
+    }
+  }
+  
+  resultado
+}
+
+secuencias <- c("ATGCGT", "ACNTGA", "ttacga", NA)
+revisar_secuencias(secuencias)
+```
+
+`logical(length(secuencias))` crea un vector lógico para almacenar los resultados, mientras que `seq_along(secuencias)` genera los índices necesarios para recorrer el vector.
+
+## **Ejercicio 3: Función 3**
+
+Crea una función llamada `clasificar_secuencias` que reciba un vector de secuencias y devuelva una lista con dos elementos:
+
+- `validas`: las secuencias formadas únicamente por `A`, `C`, `G` y `T`.
+
+- `invalidas`: las secuencias que contienen otros caracteres o valores faltantes.
+
+Utiliza la función `revisar_secuencias()` del ejemplo anterior.
+
+```{r}
+
+clasificar_secuencias <- function(secuencias) {
+  stopifnot(is.character(secuencias))
+  es_valida <- revisar_secuencias(secuencias)
+  
+  list(
+    validas = secuencias[es_valida],
+    invalidas = secuencias[!es_valida]
+  )
+}
+clasificar_secuencias(c("ATGCGT", "ACNTGA", "ttacga", NA))
+```
+
+## 5.6 Actividad Final
+
+Escribe una función `crearr_reporte_secuencias(ids, secuencias)` que:
+
+1.  Compruebe que ambos argumentos son vectores de caracteres y tienen la misma longitud.
+
+2.  Identifique las secuencias válidas mediante `revisar_secuencias()`.
+
+3.  Devuelva un `data.frame` con las columnas `id`, `secuencia`, `longitud` y `valida`.
+
+4.  Asigne `NA` a la longitud de las secuencias inválidas.
+
+```{r}
+ids <- c("seq_01", "seq_02", "seq_03", "seq_04")
+secuencias <- c("ATGCGT", "ACNTGA", "GGCCAA", "TTTAAA") 
+
+# creando funcion 
+crear_reporte_secuencias <- function(ids, secuencias) {
+  stopifnot(is.character(secuencias), 
+            length(ids) == length(secuencias))
+  longitud <- nchar(secuencias)
+  valida <- revisar_secuencias(secuencias)
+  longitud[!valida] <- NA
+  
+  data.frame(   
+    id = ids,
+    secuencia = secuencias, 
+    longitud = longitud, 
+    valida = valida
+    )
+} 
+
+crear_reporte_secuencias(ids, secuencias)
+```
+
+## 6  Scripts, paquetes y proyectos de RStudio
+
+## 6.5 Ejecutar y revisar un script completo
+
+Considera el siguiente código, guardado en un archivo llamado `revision.R`:
+
+```{r}
+# longitudes <- nchar(secuencias)
+# resultado <- data.frame(id = ids, longitud = longitudes)
+# print(resultado)
+```
+
+Un estudiante afirma que el archivo funciona porque obtuvo una tabla al ejecutarlo en su computadora.
+
+1.  ¿Por qué podría fallar si otra persona abre el archivo y lo ejecuta desde una sesión nueva de R?
+
+- Porque las demás personas no tienen las vectores definidos en su computadora. No tienen "secuencias", ni "ids".
+
+2.  ¿Cómo se puede modificar el script para que pueda ejecutarse completo sin depender de objetos creados previamente en la consola?
+
+- Creando una función que reciba los argumentos de ids y secuencias. Al final del script le damos los argumentos que queramos a la función y lo corremos.
+
+```{r}
+# codigo corregido con las especificaciones 
+
+revision <- function(ids, secuencias) {
+  longitudes <- nchar(secuencias)
+  resultado <- data.frame(
+    id = ids, 
+    longitud = longitudes
+  )
+  return(resultado)
+}
+
+revision(
+  c("seq_01", "seq_02", "seq_03", "seq_04"),
+  c("ATGCGT", "ACNTGA", "GGCCAA", "TTTAAA")
+)
+```
