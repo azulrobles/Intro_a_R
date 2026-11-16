@@ -1,0 +1,364 @@
+---
+title: "Importacion_exploracion"
+format: pdf
+editor: visual
+---
+
+# 7  Importación y exploración de datos bioinformáticos en R
+
+#### 7.3.1 Directorios y archivos
+
+```{r, echo=FALSE}
+# Borramos memoria 
+rm(list = ls())
+knitr::opts_knit$set(root.dir = "/home/arobles/Intro_a_R")
+```
+
+```{r}
+# Directorio de trabajo actual
+getwd() 
+
+# listar los archivos de una carpeta 
+list.files("data_raw/datos_sesion_02_blast") 
+
+# verifica que un archivo exista 
+file.exists("data_raw/datos_sesion_02_blast/resultados_blast.tsv")
+
+# te da la informacion de un archivo 
+file.info("data_raw/datos_sesion_02_blast/resultados_blast.tsv")
+
+# nombra a un archivo y luego verifica que exista 
+archivo_blast <- "data_raw/datos_sesion_02_blast/resultados_blast.tsv"
+file.exists(archivo_blast) 
+```
+
+#### 7.3.2 Mirar el contenido sin importarlo todavía
+
+```{r}
+# cargamos librería 
+readLines(archivo_blast, n = 5) 
+```
+
+| **Extensión habitual** | **Contenido frecuente** | **Separador o estructura** |
+|:----------------------:|:----------------------:|:----------------------:|
+| `.csv` | Tabla | Comas, aunque depende de cómo se exportó |
+| `.tsv` | Tabla | Tabulaciones |
+| `.txt` | Texto o tabla | Depende del archivo |
+| `.fasta` / `.fa` | Secuencias | Encabezados `>` y líneas de secuencia |
+| `.gz` | Archivo comprimido | Depende del formato interno |
+
+## **Ejercicio 1: Reconocer un archivo antes de importarlo**
+
+Sin abrirlo en una hoja de cálculo, utiliza R para comprobar que existe `blast_separador_incorrecto.csv`, mostrar sus tres primeras líneas y determinar qué separador utiliza realmente.
+
+```{r}
+# mostrar que exista 
+file.exists("data_raw/datos_sesion_02_blast//blast_separador_incorrecto.csv") 
+
+# mostrar sus tres primeras lineas 
+readLines("data_raw/datos_sesion_02_blast/blast_separador_incorrecto.csv", n = 3) 
+
+# determinar el separador 
+readLines("data_raw/datos_sesion_02_blast/blast_separador_incorrecto.csv", n=1)
+```
+
+### 7.4 Importación de archivos tabulares
+
+### 7.4.1 CSV y TSV con R base
+
+```{r}
+blast <- read.delim("data_raw/datos_sesion_02_blast/resultados_blast.tsv")
+metadata <- read.csv("data_raw/datos_sesion_02_blast/metadata_secuencias.csv",
+                     colClasses = c(codigo_muestra = "character"))
+
+class(blast) 
+head(blast)
+head(metadata)
+```
+
+### 7.4.2 Importación con `readr`
+
+Da mensajes sobre los tipos de columnas y herramientas para detectar problemas de lectura.
+
+```{r}
+blast <- readr::read_tsv(
+  "data_raw/datos_sesion_02_blast/resultados_blast.tsv",
+  show_col_types = FALSE
+)
+
+metadata <- readr::read_csv(
+  "data_raw/datos_sesion_02_blast/metadata_secuencias.csv",
+  col_types = readr::cols(codigo_muestra = readr::col_character()),
+  show_col_types = FALSE
+) 
+
+class(blast)
+class(metadata)
+
+```
+
+Para consultar posteriormente los tipos de datos detectados, se puede utilizar `readr::spec(blast)`.
+
+|   **R base**   |  **`readr`**   |               **Uso**               |
+|:--------------:|:--------------:|:-----------------------------------:|
+|  `read.csv()`  |  `read_csv()`  |    Archivos separados por comas     |
+| `read.delim()` |  `read_tsv()`  | Archivos separados por tabulaciones |
+| `read.table()` | `read_delim()` | Archivos con separador configurable |
+
+### 7.4.3 Encabezados, comentarios y valores faltantes
+
+```{r}
+readLines("data_raw/datos_sesion_02_blast/blast_comentarios.tsv", n = 4)
+
+blast_con_comentarios <- readr::read_tsv(
+  "data_raw/datos_sesion_02_blast/blast_comentarios.tsv",
+  comment = "#",
+  show_col_types = FALSE
+)
+
+head(blast_con_comentarios)
+
+# agregamos función para saber si tiene NA
+blast_na <- readr::read_tsv(
+  "data_raw/datos_sesion_02_blast/blast_valores_faltantes.tsv",
+  na = c("", "NA"),
+  show_col_types = FALSE
+)
+anyNA(blast_na)
+```
+
+### 7.4.4 Problemas al interpretar columnas
+
+```{r}
+# consultar la estructura de un objeto en R 
+str(blast) 
+
+# consultar las especificaciones de las columnas 
+readr::spec(blast) 
+
+# identificar problemas detectados durante la importación de los datos
+readr::problems(blast)
+```
+
+Para observar cómo funciona `problems()` cuando se detectan errores de importación:
+
+```{r}
+# cargamos readr 
+library(readr)
+
+# # Simulamos el contenido de un archivo TSV
+blast_error <- read_tsv(
+  I("secuencia\tidentidad
+seq1\t98.5
+seq2\t95.2
+seq3\terror
+seq4\t99.1"),
+  col_types = cols(
+    secuencia = col_character(),
+    identidad = col_double()
+    )
+)
+
+# # Revisamos los datos importados 
+blast_error
+
+# # Consultamos los problemas de importación 
+problems(blast_error)
+```
+
+## **Ejercicio 2: Elegir la función adecuada**
+
+Importa `metadata_secuencias.csv` y `blast_comentarios.tsv` utilizando `readr`. Conserva `codigo_muestra` como texto. Comprueba la clase de cada objeto y muestra sus primeras filas.
+
+```{r}
+blast <- readr::read_tsv(
+  "data_raw/datos_sesion_02_blast/resultados_blast.tsv",
+  show_col_types = FALSE
+)
+
+metadata <- readr::read_csv(
+  "data_raw/datos_sesion_02_blast/metadata_secuencias.csv",
+  col_types = readr::cols(codigo_muestra = readr::col_character()),
+  show_col_types = FALSE
+) 
+
+class(blast)
+class(metadata)
+head(blast)
+head(metadata)
+```
+
+### 7.5 Explorar el contenido de una tabla
+
+### 7.5.1 Dimensiones, nombres y tipos
+
+```{r}
+dim(blast)       # Filas y columnas 
+
+nrow(blast)      # Número de filas
+
+ncol(blast)      # Número de columnas
+
+names(blast)     # Nombres de columnas
+
+head(blast, 4)   # Primeras cuatro filas
+
+tail(blast, 3)   # Últimas tres filas
+
+str(blast)       # Estructura y tipos
+
+summary(blast)   # Resumen por columna
+```
+
+### 7.5.2 Seleccionar columnas y filas
+
+```{r}
+blast$query_id # Una columna  
+
+blast[, c("query_id", "pident")]
+
+blast[1:5, ] # Primeras cinco filas 
+
+blast[blast$query_id == "seq01", ] # solo las columnas con seq01 
+
+blast[blast$pident >= 90, ] # solo columnas con pident mayor o igual a 90 
+```
+
+### 7.5.3 Valores únicos y frecuencias
+
+```{r}
+# convertir a valores unicos 
+unique(blast$query_id) 
+
+# vuelve unicos los valores de una fila y mide longitud 
+length(unique(blast$query_id)) 
+
+# tabla 
+table(blast$query_id) 
+
+# los ordena de forma decresciente 
+sort(table(blast$query_id), decreasing = TRUE) 
+```
+
+### 7.5.4 Preguntas que podemos responder
+
+```{r}
+# suma los NA en cada columna  
+colSums(is.na(blast)) 
+
+# pregunta si hay NA 
+anyNA(blast) 
+```
+
+## **Ejercicio 3: Explorar resultados tipo BLAST**
+
+Con `resultados_blast.tsv`, responde mediante código:
+
+1.  ¿Cuántos registros y columnas tiene la tabla?
+
+2.  ¿Cuántos `query_id` diferentes aparecen?
+
+3.  ¿Cuántos resultados tiene cada consulta?
+
+4.  ¿Qué filas tienen `pident` mayor o igual a 95?
+
+5.  ¿Hay valores faltantes?
+
+```{r}
+# 1. 
+
+ncol(blast)
+nrow(blast)
+
+# 2. 
+length(unique(blast$query_id)) 
+
+# 3. 
+table(blast$query_id)
+
+# 3. 
+blast[(blast$pident) >= 95, ] 
+which(blast$pident >= 95)
+
+# 4. 
+anyNA(blast) 
+```
+
+### 7.6.1 Separador equivocado
+
+```{r}
+ruta <- "data_raw/datos_sesion_02_blast/blast_separador_incorrecto.csv"
+mal <- readr::read_csv(ruta, show_col_types = FALSE)
+names(mal) 
+
+bien <- readr::read_tsv(ruta, show_col_types = FALSE)
+names(bien)
+```
+
+### 7.6.2 Identificadores que parecen números
+
+```{r}
+metadata <- readr::read_csv(
+  "data_raw/datos_sesion_02_blast/metadata_secuencias.csv",
+  col_types = readr::cols(codigo_muestra = readr::col_character()),
+  show_col_types = FALSE
+)
+metadata$codigo_muestra
+```
+
+### 7.6.3 Ausencias y registros repetidos
+
+```{r}
+blast_na <- readr::read_tsv(
+  "data_raw/datos_sesion_02_blast/blast_valores_faltantes.tsv",
+  show_col_types = FALSE
+)
+colSums(is.na(blast_na))
+
+# para ver si hay duplicados 
+anyDuplicated(blast_na)
+anyDuplicated(blast_na$query_id) 
+```
+
+## **Ejercicio 4: Detectar un problema de lectura**
+
+Un estudiante importa `blast_separador_incorrecto.csv` con `read_csv()` y obtiene una sola columna. ¿Significa que el archivo contiene una única variable? Explica cómo comprobarlo y corrige la importación.
+
+```{r}
+# comprobamos 
+readLines("data_raw/datos_sesion_02_blast/blast_separador_incorrecto.csv", n=3) 
+
+# corregimos 
+blast_cor <- read_delim(
+  "data_raw/datos_sesion_02_blast/blast_separador_incorrecto.csv", 
+  delim = "\t",
+  show_col_types = FALSE) 
+
+head(blast_cor)
+```
+Lo comprobamos al usar "readLines", que muestra que no hay una sola variable, sino que el delimitador es el tabulador "\t" y por ello los agrupa read_csv. Para corregirlo debemos utilizar "read_delim" para indicar el delimitador correcto. 
+
+### 7.7 Una mirada breve a FASTA desde R
+
+```{r}
+lineas <- readLines("data_raw/datos_sesion_02_blast/secuencias.fasta")
+head(lineas, 6)
+
+# localizar con grep 
+encabezados <- grep("^>", lineas, value = TRUE)
+encabezados
+
+# tamaño 
+length(encabezados) 
+```
+
+## **Ejercicio 5: Reconocer secuencias en FASTA**
+
+Utiliza `readLines()` y `grep()` para identificar los encabezados de `secuencias.fasta`. ¿Cuántas entradas FASTA contiene el archivo? Muestra únicamente sus encabezados.
+
+```{r}
+sec_lineas <- readLines("data_raw/datos_sesion_02_blast/secuencias.fasta") 
+encabezado <- grep("^>", sec_lineas, value = TRUE) 
+encabezado
+length(encabezado)
+```
