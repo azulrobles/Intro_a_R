@@ -3,7 +3,6 @@ title: "Intro_R"
 format: pdf
 editor: visual
 ---
-
 ## Introducción a R y organización de proyectos bioinformáticos
 
 ```{r}
