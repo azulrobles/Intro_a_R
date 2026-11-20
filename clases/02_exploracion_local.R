@@ -1,5 +1,8 @@
   
-  # 1. COmprobar si existen 
+knitr::opts_knit$set(root.dir = "/home/arobles/Intro_a_R")
+
+
+# 1. COmprobar si existen 
   
   file.exists("data_raw/datos_sesion_02_blast/resultados_blast.tsv", 
               "data_raw/datos_sesion_02_blast/metadata_secuencias.csv", 
@@ -43,8 +46,8 @@
   
   # 6. Leer el FASTA e indicar cuántos encabezados contiene 
   
-  lineas_fasta <- readLines("data_raw/datos_sesion_02_blast/secuencias.fasta")
-  head(lineas_fasta, 6)
+  lineas <- readLines("data_raw/datos_sesion_02_blast/secuencias.fasta")
+  head(lineas, 6)
   
   # analizar cuántas secuencias tiene el fasta 
   encabezados <- grep("^>", lineas, value = TRUE)
@@ -61,3 +64,5 @@
   # Coment1: tenemos dos tablas y un fasta 
   # Coment2: no tenemos valores faltantes en ningún arhivo 
   # Coment3: se importaron las tablas etc 
+
+  

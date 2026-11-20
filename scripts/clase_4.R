@@ -25,7 +25,292 @@ metadata <- read_csv(
 
 head(blast_A)
 
+# Integración de datos y automatización de análisis en R -------------------
+
+
+library(dplyr)
+library(readr)
+library(purrr)
+getwd()
+
+carpeta_datos <- "data_raw/datos_sesion_04_integracion"
+carpeta_blast <- file.path(carpeta_datos, "blast_muestras")
+
+if (!dir.exists("results")) {
+  dir.create("results")
+}
+
+blast_A <- read_tsv(
+  file.path(carpeta_blast, "muestra_A.tsv"),
+  show_col_types = FALSE
+)
+
+metadata <- read_csv(
+  file.path(carpeta_datos, "metadata_secuencias.csv"),
+  col_types = cols(codigo_muestra = col_character(), .default = col_guess())
+)
+
+head(blast_A)
+head(metadata)
+
+
+blast_A_con_metadata <- blast_A %>%
+  left_join(metadata, by = "query_id")
+
+blast_A_con_metadata %>%
+  select(query_id, subject_id, pident, organismo, origen) %>%
+  head()
+
+blast_B <- read_tsv(
+  file.path(carpeta_blast, "muestra_B.tsv"),
+  show_col_types = FALSE
+)
+
+blast_C <- read_tsv(
+  file.path(carpeta_blast, "muestra_C.tsv"),
+  show_col_types = FALSE
+)
+
+nrow(blast_C)
 
 
 
+blast_C %>%
+  inner_join(metadata, by = "query_id") %>%
+  nrow()
+
+
+blast_C %>%
+  anti_join(metadata, by = "query_id")
+
+
+# 9.4.4 full_join(): conservar las filas de ambas tablas ------------------
+
+blast_C %>%
+  full_join(metadata, by = "query_id") %>%
+  select(query_id, subject_id, organismo) %>%
+  arrange(query_id)
+# blast_C %>%
+  full_join(metadata, by = "query_id") %>%
+  select(query_id, subject_id, organismo) %>%
+  arrange(query_id)
+
+
+
+  blast_total <- bind_rows(
+    muestra_A = blast_A,
+    muestra_B = blast_B,
+    muestra_C = blast_C,
+    .id = "muestra"
+  )
+  
+  blast_total %>%
+    count(muestra)  
+  
+blast_total
+bind 
+
+## 9.7.1 Importar e inspeccionar
+
+carpeta_rizosfera <- "data_raw/datos_rizosfera"
+
+conteos_riz <- read_tsv(
+  file.path(carpeta_rizosfera, "conteos_taxonomia_rizosfera.tsv"),
+  show_col_types = FALSE
+)
+
+head(conteos_riz)
+
+
+metadata_riz <- read_csv(
+  file.path(carpeta_rizosfera, "metadata_rizosfera.csv"),
+  show_col_types = FALSE
+)
+head(metadata_riz)
+
+dim(conteos_riz)
+
+host <- metadata_riz %>% 
+  count(host_name, sort = TRUE)
+host
+
+
+niveles <- c(
+  "kingdom", "phylum", "class", "order",
+  "family", "genus", "species"
+)
+
+conteos_limpios <- conteos_riz %>%
+  mutate(
+    across(
+      all_of(niveles),
+      ~ na_if(sub("^[a-z]__", "", .x), "")
+    )
+  )
+
+conteos_limpios %>%
+  select(taxon_id, all_of(niveles)) %>%
+  head()  
+  
+library(tidyr)
+
+
+ids_muestras <- metadata_riz$sample_id
+
+stopifnot(
+  !anyDuplicated(ids_muestras),
+  all(ids_muestras %in% names(conteos_limpios))
+)
+
+conteos_largos <- conteos_limpios %>%
+  pivot_longer(
+    cols = all_of(ids_muestras),
+    names_to = "sample_id",
+    values_to = "conteo"
+  )
+
+datos_riz <- conteos_largos %>%
+  left_join(
+    metadata_riz %>% select(sample_id, host_name, country, year),
+    by = "sample_id",
+    relationship = "many-to-one"
+  )
+
+glimpse(datos_riz) 
+View(datos_riz)
+
+
+totales <- datos_riz %>% 
+  group_by(sample_id) %>% 
+  summarise(
+    total_lecturas = sum(conteo),
+    .groups = "drop"
+  )
+head(totales)
+
+write_tsv(totales, "results/totales")
+
+abundancias_genero <- datos_riz %>%
+  mutate(genus = if_else(is.na(genus), "Sin clasificar", genus)) %>%
+  group_by(sample_id, host_name, genus) %>%
+  summarise(conteo = sum(conteo), .groups = "drop") %>%
+  group_by(sample_id) %>%
+  mutate(abundancia_relativa = conteo / sum(conteo)) %>%
+  ungroup()
+
+abundancias_genero %>%
+  select(sample_id, host_name, genus, conteo, abundancia_relativa) 
+glimpse(abundancias_genero)
+
+
+
+generos_5 <- abundancias_genero %>%
+  mutate(
+    taxon_final = if_else(
+      genus != "Sin clasificar" & abundancia_relativa < 0.05,
+      "Otros",
+      genus
+    )
+  ) %>%
+  group_by(sample_id, host_name, taxon_final) %>%
+  summarise(
+    abundancia_relativa = sum(abundancia_relativa),
+    .groups = "drop"
+  )
+
+comprobar <- generos_5 %>%
+  group_by(sample_id) %>%
+  summarise(total = sum(abundancia_relativa))
+comprobar 
+
+### función 
+
+# Recibe los argumentos "tabla", el "nivel" que por default es genus, a menos 
+# que se especifique otro y el umbral "" 
+# agrupa las columnas descritas 
+preparar_abundancias <- function(tabla, nivel = "genus", umbral = 0.05) {
+  niveles_validos <- c(
+    "kingdom", "phylum", "class", "order",
+    "family", "genus", "species"
+  )
+  
+# se detiene si el nivel no pertenece a los niveles_validos
+# convierte el umbral a numerico y pide que su longitud sea de 1 
+# que el umbral no tenga valores faltantes 
+# y que el valor del umbral este entre 0 y 1 
+  stopifnot(
+    nivel %in% niveles_validos,
+    is.numeric(umbral), length(umbral) == 1,
+    !is.na(umbral), umbral >= 0, umbral <= 1
+  )
+
+# para cada nivel hay una etiqueta correspondiente 
+  etiqueta_otros <- if (nivel == "phylum") {
+    "Filos < 5%"
+  } else if (nivel == "genus") {
+    "Géneros < 5%"
+  } else {
+    "Taxones < 5%"
+  }
+
+# tomando "tabla" se le agrega una columna donde se extraiga los datos del nivel 
+# si el taxon tiene valores faltantes se va hacia "Sin clasificar" 
+  tabla %>%
+    mutate(
+      taxon = .data[[nivel]],
+      taxon = if_else(is.na(taxon) | taxon == "",
+                      "Sin clasificar", taxon)
+      
+# se agrupa por id, host_name y taxon 
+# se suman los valores de conteoy se desagrupan 
+# se agrupa por id 
+# se crea una nueva columna con la abundancia relativa 
+# se desagrupa y se crea columna con taxon_final. Si el umbral es menor a la 
+# abundancia relativa se va a "otros" y si es mayor se va a "taxon" 
+    ) %>%
+    group_by(sample_id, host_name, taxon) %>%
+    summarise(conteo = sum(conteo), .groups = "drop") %>%
+    group_by(sample_id) %>%
+    mutate(abundancia_relativa = conteo / sum(conteo)) %>%
+    ungroup() %>%
+    mutate(
+      taxon_final = if_else(
+        abundancia_relativa < umbral,
+        etiqueta_otros,
+        taxon
+      )
+      
+# se agrupa por id, host_name y taxon_final
+# se suma la abundancia relativa 
+    ) %>%
+    group_by(sample_id, host_name, taxon_final) %>%
+    summarise(
+      abundancia_relativa = sum(abundancia_relativa),
+      .groups = "drop"
+    )
+}
+
+
+generos_5 <- preparar_abundancias(datos_riz, "genus", 0.05)
+filos_5 <- preparar_abundancias(datos_riz, "phylum", 0.05)
+familias_1 <- preparar_abundancias(datos_riz, "family", 0.01)
+
+
+write_tsv(generos_5, "results/generos_5.tsv")
+write_tsv(filos_5, "results/filos_5.tsv")
+write_tsv(familias_1, "results/familias_1.tsv")
+
+
+
+### Actividad breve: ¿la tabla está lista para graficarse? 
+
+# Sin construir otra función, revisa generos_5 y responde:
+  
+#  ¿Qué representa una fila de generos_5?
+#  ¿Por qué un mismo género puede aparecer individualmente en una muestra 
+# y dentro de Otros en otra?
+#  Si construimos una gráfica de barras apiladas al 100 %, ¿cuánto deben sumar 
+# las abundancias relativas de cada muestra? Compruébalo con group_by() y summarise().
+# ¿Qué columna nos permite comparar las muestras según la planta hospedera? 
+# ¿De dónde proviene?
 
