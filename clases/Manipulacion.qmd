@@ -424,29 +424,24 @@ Utilizando `dplyr`:
 
 4.  Calcula cuántos genes cumplen esta condición en cada muestra y compara los resultados entre Control y Estrés.
 
-```{r}
-# 1. calculamos el conteo promedio de los genes en cada muestra 
-datos %>% 
-  group_by(sample_id) %>% 
-  summarise(
-    promedio = mean(conteo))
+```{r, warning=FALSE}
+datos <- read_csv(
+  "data_raw/expresion_genica_estres.csv",
+  show_col_types = FALSE
+)
 
-# 2. agregar "promedio_muestra" que contiene promedio para cada observacion 
-resumen12 <- datos %>%
+resultado <- datos %>%
   group_by(sample_id) %>%
-  mutate(promedio_muestra = mean(conteo)) %>%
-  ungroup()
-resumen12
+  mutate(
+    promedio_muestra = mean(conteo),         
+    genes_destacados = conteo >= 2 * promedio_muestra    
+  ) %>% 
+  ungroup %>% 
+  group_by(condicion, sample_id) %>%
+  summarise(n_genes = sum(genes_destacados),         
+            .groups = "drop")
 
-# 3. genes cuyo conteo sea al menos el doble del promedio de su muestra 
-resumen12 %>% 
-  filter(conteo >= 2 * promedio_muestra)
-  
-# genes que cumplen esta condicion en cada muestra y comparar resultados 
-resumen12 %>% 
-  group_by(sample_id, condicion) %>% 
-  summarise(genes_destacados = sum(conteo >= 2 * promedio_muestra))
-  
+resultado
 ```
 
 **Pregunta de interpretación:** ¿Por qué es más adecuado comparar cada gen con el promedio de su propia muestra en lugar de utilizar un único promedio calculado con todas las muestras?
