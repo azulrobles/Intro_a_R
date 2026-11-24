@@ -2079,7 +2079,6 @@ datos_riz <- conteos_largos %>%
   )
 
 glimpse(datos_riz) 
-View(datos_riz)
 
 
 totales <- datos_riz %>% 
