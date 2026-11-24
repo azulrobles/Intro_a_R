@@ -1,0 +1,2292 @@
+---
+title: "entregables"
+format: html
+editor: visual
+---
+
+## Ejercicios completos 
+
+# Clase 1 
+
+## Introducción a R y organización de proyectos bioinformáticos
+
+```{r}
+# Borrar memoria 
+rm(list = ls())
+
+# Directorio de trabajo 
+getwd()
+
+# 2.8.1 Ejemplo código 
+a <- 2
+b <- 3
+suma <- a + b
+suma
+```
+
+### 2.9.2 Instalar librerías: CRAN
+
+```{r}
+# install.packages("tidyverse")
+```
+
+### 2.9.3 Instalar librerías: Bioconductor
+
+```{r}
+# install.packages("BiocManager") # Esto es necesario solo 1 vez
+```
+
+### 2.9.5 Eliminación de paquetes
+
+```{r}
+# remove.packages("package-to-remove")
+```
+
+### 2.9.6 Cargar paquetes en el ambiente de R
+
+```{r}
+library(ggplot2)
+```
+
+### 2.9.7 Verificar paquetes instalados y sus versiones
+
+```{r}
+# "ggplot2" %in% rownames(installed.packages())
+# packageVersion("ggplot2")
+# installed.packages()[, c("Package", "Version")]
+# help(package = "ggplot2")
+# ?plot
+```
+
+### 2.9.8 Actualizar paquetes
+
+```{r}
+# update.packages(ask = TRUE) 
+```
+
+### 2.9.9 Instalación de una versión específica de un paquete
+
+```{r}
+# Instalar paquertería  
+# install.packages("remotes")
+
+# Instalar versión deseada 
+# remotes::install_version(
+#  "dplyr",
+#  version = "1.1.4",
+#  repos = "https://cloud.r-project.org"
+# ) 
+
+# Verificar que se instaló 
+packageVersion("dplyr")
+```
+
+## 3. Objetos y estructuras de datos en R
+
+### 3.1 Asignación, nombres y tipos básicos
+
+| **Clases**  | **Declaración de la variable** | **Conversión de formato** |
+|:-----------:|:------------------------------:|:-------------------------:|
+|  `numeric`  |          `numeric()`           |      `as.numeric()`       |
+|  `integer`  |          `integer()`           |      `as.integer()`       |
+|  `double`   |           `double()`           |       `as.double()`       |
+| `character` |         `character()`          |     `as.character()`      |
+|  `logical`  |          `logical()`           |      `as.logical()`       |
+|  `factor`   |           `factor()`           |       `as.factor()`       |
+
+NOTA: `as.integer()` convierte los numeros a enteros. Ejemplo: as.integer(2.5) = 2. En cambio, `as.double()` permite que los numeros contengan decimales.
+
+Asignación:
+
+```{r}
+identificador <- "gene_001"
+longitud <- 450L
+proporcion_gc <- 0.53
+anotado <- TRUE
+```
+
+Conocer class, typeof y str:
+
+```{r}
+# class 
+class(identificador) 
+class(longitud)
+class(proporcion_gc) 
+class(anotado) 
+class(1.5)
+
+# typeof 
+typeof(1.5)
+
+# str 
+str(identificador) 
+```
+
+### 3.2 Principales estructuras de datos en R
+
+| **Estructura** | **Dimensión** | **Homogeneidad** | **Ejemplo** | **Uso típico** |
+|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
+| **Vector** | 1D | Homogénea (todos del mismo tipo) | `c(1,2,3)` | Secuencias simples de números, caracteres o lógicos |
+| **Lista** | 1D | Heterogénea (puede mezclar tipos) | `list(a=1:3, b="hola")` | Agrupar objetos distintos, resultados de modelos |
+| **Matriz** | 2D | Homogénea | `matrix(1:6, nrow=2)` | Cálculos numéricos, álgebra lineal |
+| **Array** | nD (más de 2 dimensiones) | Homogénea | `array(1:8, dim=c(2,2,2))` | Datos multidimensionales, imágenes, series temporales |
+| **Data frame** | 2D | Heterogénea (cada columna puede ser de distinto tipo) | `data.frame(x=1:3, y=c("a","b","c"))` | Datos tabulares, análisis estadístico |
+| **Tibble** | 2D | Heterogénea | `tibble(x=1:3, y=c("a","b","c"))` | Variante moderna de data frame, impresión más clara |
+
+### 3.2.1 Vectores e indexación
+
+```{r}
+genes <- c("gA", "gB", "gC", "gD")
+longitudes <- c(150, 400, 220, 510)
+
+length(genes)
+
+genes[1]
+genes[c(2, 4)]
+genes[longitudes >= 300]
+longitudes / 3
+longitudes >= 300
+sum(longitudes >= 300)
+```
+
+## **Ejercicio 1. Vectores y selecciónPregunta**
+
+```{r}
+# creando vectores 
+ids <- c("g1", "g2", "g3", "g4", "g5") 
+tam <- c(90, 450, 310, 120, 600) 
+
+# 1. Seleccionamos tercer identificador 
+ids[3]
+
+# 2. Recuperamos los ids de genes con long >= 300 
+ids[tam >= 300] 
+
+# 3. Contar cuántos cumplen esa condición sin usar ciclo 
+sum(tam >= 300)
+```
+
+```{r}
+valores <- c("12", "18", "sin_dato", "NA")
+# La conversión produce una advertencia; no la ejecutamos automáticamente
+# as.numeric(valores) 
+```
+
+```{r}
+# O podemos preguntar directamente si hay valores faltantes en un vector.
+is.na(c(10, NA, 20)) 
+```
+
+### 3.2.2 Matrices y arreglos
+
+```{r}
+conteos <- matrix(
+  c(12, 8, 4, 6, 10, 2),
+  nrow = 3,
+  dimnames = list(c("g1", "g2", "g3"), c("M1", "M2"))
+)
+conteos
+
+# extraer posición 
+conteos[2, 1]
+conteos[, "M2"] 
+
+# para conocer dimensión 
+dim(conteos)
+
+# crear arreglo y ver dimensión 
+arreglo <- array(1:8, dim = c(2, 2, 2))
+dim(arreglo) 
+```
+
+### 3.2.3 Data frames y tibbles
+
+```{r}
+# creando dataframe 
+anotaciones <- data.frame(
+  gen = c("g1", "g2", "g3"),
+  longitud = c(450, 120, 800),
+  producto = c("transportador", "hipotetica", "enzima")
+)
+
+anotaciones 
+
+# integridad de mi dataframe 
+str(anotaciones) 
+
+# extraer columna 
+anotaciones$longitud 
+
+# extraer fila 2 
+anotaciones[2, ] 
+
+# extrae las filas en las que la long fue mayor a 200
+anotaciones[anotaciones$longitud > 200, ] 
+```
+
+Un **tibble** es una variante moderna de `data.frame`, con una impresión más compacta y comportamientos de selección más consistentes.
+
+```{r}
+# Requiere haber instalado tibble
+# tibble::as_tibble(anotaciones)
+```
+
+### 3.2.4 Listas y factores
+
+Las **listas** pueden almacenar objetos de distintos tipos y tamaños. Resultan útiles para reunir resultados de un análisis.
+
+```{r}
+# creando lista 
+muestra <- list(
+  id = "M01",
+  secuencias = c("ATGCGT", "CCATGA"),
+  anotaciones = anotaciones
+)
+
+# Extraer la lista, es un vector
+muestra$id
+muestra[["secuencias"]] # es lo mismo que lo de arriba 
+
+# Conserva la estructura de una lista
+muestra["secuencias"] 
+```
+
+Un **factor** representa categorías con niveles definidos. Su orden puede importar al crear tablas o gráficos.
+
+```{r}
+# creamos un factor y la guardamos en variable 
+condicion <- factor(c("control", "tratamiento", "control"),
+                    levels = c("control", "tratamiento"))
+
+# niveles del factor 
+levels(condicion)
+```
+
+## **Ejercicio 2: Factores**
+
+Crea una vector con las letras `A M A B M M B A B B`, donde `A` significa Alto, `B` bajo y `M` medio. Convierte las entradas del vector a factores y especifica que `A > M > B`.
+
+```{r}
+# creando vector 
+datos <- c("A", "M", "A", "B", "M", "M", "B", "A", "B", "B") 
+# convertir a factor 
+fac <- factor(datos, 
+              levels = c("B", "M", "A"),
+              labels = c("Bajo", "Medio", "Alto"),
+              ordered = TRUE) 
+fac 
+# se ordena de menor a mayor 
+```
+
+### 3.2.5 Resumen de tipos de objetos
+
+| **Estructura** | **Dimensiones** | **¿Elementos del mismo tipo?** | **Ejemplo de uso** |
+|:----------------:|:----------------:|:----------------:|:----------------:|
+| Vector | 1 | Sí | Identificadores o longitudes |
+| Matriz | 2 | Sí | Conteos por gen y muestra |
+| Array | 2 o más | Sí | Datos multidimensionales |
+| Data frame / tibble | 2 | Por columna | Tabla de anotaciones |
+| Lista | Variable | No | Resultados heterogéneos |
+
+## **Ejercicio 3. Elegir estructuras**
+
+1.  Construye un `data.frame` con tres genes, sus longitudes y una etiqueta funcional.
+
+2.  Recupera únicamente las filas con longitud mayor que 200.
+
+3.  Crea una lista que contenga la tabla y el identificador de una muestra.
+
+4.  Explica por qué una matriz de caracteres no sería una buena sustitución para la tabla cuando queremos conservar longitudes numéricas.
+
+```{r}
+# creamos data.frame 
+data <- data.frame(
+  genes = c("BRCA1", "TP53", "BRCA2"),
+  long = c(100, 230, 121),
+  funcion = c("Supresor tumoral", "guardián", "Supresor tumoral")
+)
+
+# Recuperamos las filas con long mayor que 200 
+filtrado <- data[data$long >= 200, ] 
+
+# Creamos lista con tabla e identificador de una muestra 
+info_lista <- list(
+  tabla = filtrado,
+  muestra = "0-11"
+)
+print(info_lista)
+```
+
+### 3.3 Operadores
+
+| **Aritméticos** | **Comparación** | **Argumentos lógicos (Logical Operators)** |
+|:----------------------:|:----------------------:|:----------------------:|
+| `+` Adición / suma | `<` Menor que | `!x` - Not x (logical NOT) |
+| `-` Sustracción / resta | `>` Mayor que | `x & y` OR `x AND y` - (logical AND) |
+| `*` Multiplicación | `<=` Menor o igual que | `x && y` - identico |
+| `/` OR %% División | `>=` Mayor o igual que | `xor(x,y)` Funcion OR |
+| `^` OR \*\* Exponencial | `==` Igual a | `%in%` pertenece a |
+| `%/%` División integral | `!=` Diferente de |  |
+
+Otra forma de escribir OR es `x | y` OR `x || y`.
+
+### 3.3.1 Jerarquía de operaciones
+
+|     |                   |
+|-----|-------------------|
+| 1   | `^`               |
+| 2   | `* /`             |
+| 3   | `+ -`             |
+| 4   | `< > <= >= == !=` |
+| 5   | `!`               |
+| 6   | `&`               |
+| 7   | OR                |
+
+## 4  Estructuras de control
+
+### 4.1 Condicionales: `if`, `else if` y `else`
+
+```{r}
+# creando variables 
+secuencia <- "ATGCGT"
+longitud <- nchar(secuencia)
+
+# usando condicional if 
+if (longitud >= 10) {
+  print("La secuencia tiene al menos 10 nucleótidos")
+} 
+
+if (longitud >= 10) {
+  print("La secuencia tiene al menos 10 nucleótidos")
+} else {
+  print("La secuencia tiene menos de 10 nucleótidos")
+} 
+
+# usando else if 
+if (longitud >= 20) {
+  print("Secuencia larga")
+} else if (longitud >= 10) {
+  print("Secuencia mediana")
+} else {
+  print("Secuencia corta")
+} 
+```
+
+### 4.1.1 Validación de valores y condicionales anidados
+
+```{r}
+# variable 
+valor <- -3 
+
+# if anidado 
+if (is.na(valor)) {
+  print("El valor está ausente")
+} else {
+  if (valor < 0) {
+    print("Es negativo")
+  } else if (valor > 0) {
+    print("Es positivo")
+  } else {
+    print("Es cero")
+  }
+}
+
+# sin anidamiento 
+if (is.na(valor)) {
+  print("El valor está ausente")
+} else if (valor < 0) {
+  print("Es negativo")
+} else if (valor > 0) {
+  print("Es positivo")
+} else {
+  print("Es cero")
+} 
+```
+
+## **Ejercicio 1. Clasificación de un valor**
+
+Define una variable `conteo` que represente el número de lecturas asignadas a un gen. Escribe un condicional que imprima:
+
+- `"Dato faltante"` si el valor es `NA`.
+
+- `"Conteo inválido"` si es negativo.
+
+- `"Sin lecturas"` si es cero.
+
+- `"Con lecturas"` si es positivo.
+
+Prueba tu código con `NA`, `-2`, `0` y `15`.
+
+```{r}
+conteo <- 5  
+ 
+if (is.na(conteo)) {
+  print("Dato faltante")
+} else if (conteo < 0) {
+  print("Conteo invalido")
+} else if (conteo == 0) {
+  print("Sin lecturas")
+} else {
+  print("Con lecturas")
+}
+```
+
+### 4.1.2 Condiciones sobre vectores: `ifelse()`, `all()`, `any()` y `which()`
+
+La función `ifelse()` evalúa una condición **elemento por elemento** y devuelve un resultado de acuerdo con si cada elemento satisface la condición.
+
+```{r}
+conteos <- c(0, 12, 4, 0, 25)
+
+estado <- ifelse(conteos > 0, "Detectado", "No detectado")
+estado 
+```
+
+En cambio, `all()`, `any()` y `which()` resumen o localizan los resultados de comparaciones lógicas:
+
+```{r}
+conteos <- c(0, 12, 4, 0, 25)
+
+# all
+all(conteos >= 0)  # ¿Todos los conteos son no negativos? 
+
+# any 
+any(conteos == 0)  # ¿Existe al menos un cero?
+
+# which 
+which(conteos == 0) # ¿En qué posiciones hay ceros?
+```
+
+## **Ejercicio 2. Verificación de conteos**
+
+Considera el vector `conteos <- c(8, 0, 13, 5, 0, 21)`. Utiliza las funciones anteriores para:
+
+1.  Verificar si todos los valores son no negativos.
+
+2.  Determinar si existe al menos un conteo mayor que 20.
+
+3.  Obtener las posiciones de los conteos iguales a cero.
+
+4.  Crear un vector que indique `"Presente"` o `"Ausente"` según si el conteo es mayor que cero.
+
+```{r}
+# creando vector 
+conteos <- c(8, 0, 13, 5, 0, 21) 
+
+# verificando si todos los valores son negativos 
+all(conteos == 0) 
+
+# determinar si existe al menos un conteo mayor que 20 
+any(conteos > 20) 
+
+# obtener posiciones de conteos = 0 
+which(conteos == 0) 
+
+# creando vector que indique Presente o Ausente si conteo es mayor a 0 
+estado <- ifelse(conteos > 0, "Presente", "Ausente") 
+estado 
+```
+
+### 4.2 Ciclo `for`
+
+```{r}
+#for (elemento in coleccion) {
+  # Instrucciones que se ejecutan para cada elemento
+#}
+
+# ejemplo de recorrer los números del 1 al 5 
+for (i in 1:5) {
+  print(i)
+}
+```
+
+### 4.2.1 Recorrer secuencias biológicas
+
+```{r}
+secuencias <- c("ATGC", "ATGCGT", "CCATGAA")
+
+for (secuencia in secuencias) {
+  print(nchar(secuencia))
+}
+# nchar cuenta carácteres 
+
+# para guardar las longitudes 
+longitudes <- numeric(length(secuencias))
+
+for (i in seq_along(secuencias)) {
+  longitudes[i] <- nchar(secuencias[i])
+}
+
+longitudes
+```
+
+Aquí `seq_along(secuencias)` genera las posiciones del vector.
+
+### 4.2.2 Combinar `for` e `if`
+
+```{r}
+secuencias <- c("ATGC", "ATGCGT", "CCATGAA")
+
+for (secuencia in secuencias) {
+  if (nchar(secuencia) >= 6) {
+    print("Longitud de al menos 6 nucleótidos")
+  } else {
+    print("Longitud menor que 6 nucleótidos")
+  }
+} 
+```
+
+## **Ejercicio 3. Longitudes de secuencias**
+
+1.  Utiliza un ciclo `for` para guardar las longitudes en un vector llamado `longitudes`.
+
+2.  Crea otro vector llamado `clasificacion` que contenga `"Corta"` para longitudes menores que 5 y `"Larga"` para longitudes de al menos 5.
+
+3.  Muestra ambos vectores.
+
+```{r}
+# creando vector 
+secuencias <- c("ATG", "ATGCGT", "AATTCCGG", "CG") 
+
+# usar ciclo for para guardar longs 
+longitudes <- numeric(length(secuencias))
+
+for (i in seq_along(secuencias)) {
+  longitudes[i] <- nchar(secuencias[i])
+} 
+
+longitudes 
+
+# vector de clasificacion 
+clasificacion <- ifelse(longitudes < 5, "Corta", "Larga")
+clasificacion
+```
+
+### 4.3 Ciclo `while`
+
+`while` repite un bloque de instrucciones **mientras una condición sea verdadera**.
+
+```{r}
+#while (condicion) {
+  # Instrucciones que se repiten mientras la condición sea TRUE
+# } 
+
+i <- 0
+
+while (i < 5) {
+  print(i)
+  i <- i + 1
+}
+
+# evitar ciclos infinitos 
+i <- 0
+while (i < 5) {
+  print(i)
+  i <- i + 1
+} 
+```
+
+### 4.3.1 Ejemplo: encontrar un umbral
+
+Queremos encontrar el primer entero positivo cuyo cuadrado sea mayor que 50:
+
+```{r}
+limite <- 50
+numero <- 0
+
+while (numero^2 <= limite) {
+  numero <- numero + 1
+}
+
+numero
+numero^2
+```
+
+### 4.3.2 Ejemplo: recorrer progresivamente una secuencia
+
+```{r}
+secuencia <- "ATGCGT"
+posicion <- 1
+fragmentos <- character(nchar(secuencia))
+
+while (posicion <= nchar(secuencia)) {
+  fragmentos[posicion] <- substr(secuencia, 1, posicion)
+  posicion <- posicion + 1
+}
+
+fragmentos
+```
+
+La función `substr(secuencia, 1, posicion)` extrae los caracteres comprendidos entre las posiciones indicadas.
+
+## **Ejercicio 4. Alcanzar una longitud**
+
+Imagina que estamos construyendo una secuencia mediante la adición de un nucleótido `"A"` en cada iteración. Escribe un ciclo `while` que comience con una cadena vacía y se detenga cuando la secuencia alcance **8 nucleótidos**. Muestra el resultado final.
+
+```{r}
+sec <- "" 
+
+while (nchar(sec) < 8) {
+  sec <- paste0(sec, "A")
+}
+
+sec
+nchar(sec)
+```
+
+- **`length(x)`** devuelve el número de elementos de un vector o una lista.
+
+- **`nchar(x)`** devuelve el número de caracteres de una cadena de texto.
+
+```{r}
+secuencia <- "ATGCGTA"
+
+length(secuencia)
+nchar(secuencia)
+```
+
+### 4.4 ¿Cuándo utilizar cada estructura?
+
+| **Estructura** | **¿Para qué sirve?** | **Ejemplo de aplicación** |
+|:----------------------:|:----------------------:|:----------------------:|
+| `if` / `else` | Elegir entre alternativas a partir de una condición única. | Verificar si un conteo es válido. |
+| `ifelse()` | Clasificar elementos de un vector. | Etiquetar conteos positivos y ceros. |
+| `for` | Recorrer una colección de elementos. | Calcular la longitud de varias secuencias. |
+| `while` | Repetir hasta que deje de cumplirse una condición. | Construir una secuencia hasta alcanzar una longitud. |
+
+## 5  Funciones en R
+
+Una función recibe **argumentos**, ejecuta instrucciones y devuelve un **resultado**. En R se construye con `function()` y se asigna a un nombre mediante `<-`.
+
+```{r}
+#nombre_funcion <- function(argumentos) {
+  # Instrucciones
+#  resultado
+#}
+```
+
+### 5.1 Crear y utilizar una función
+
+```{r}
+longitud_adn <- function(secuencia) {
+  longitud <- nchar(secuencia)
+  return(longitud)
+}
+
+longitud_adn("ATGCGTAA")
+longitud_adn("CCGTA")
+
+# sin return 
+longitud_adn <- function(secuencia) {
+  nchar(secuencia)
+}
+
+longitud_adn("ATGCGTAA")
+```
+
+### 5.1.1 Funciones con varios argumentos
+
+```{r}
+# usando grepl 
+contiene_motivo <- function(secuencia, motivo) {
+  grepl(motivo, secuencia, fixed = TRUE)
+}
+
+contiene_motivo("ATGCGTAA", "CGT")
+contiene_motivo("ATGCGTAA", "GGG")
+```
+
+El argumento `fixed = TRUE` indica que buscamos el motivo como texto literal, sin interpretarlo como una expresión regular. La función devuelve `TRUE` o `FALSE`.
+
+## **Ejercicio 1: Función 1**
+
+Escribe una función llamada `empieza_con` que reciba una secuencia y un prefijo, y determine si la secuencia comienza con ese prefijo. Pruébala con `"ATGCGT"` y los prefijos `"ATG"` y `"TGA"`.
+
+```{r}
+empieza_con <- function(secuencia, prefijo) {
+  startsWith(secuencia, prefijo)
+} 
+empieza_con("ATGCGT", "ATG")
+empieza_con("ATGCGT", "TGA")
+```
+
+### 5.2 Argumentos con valores predeterminados
+
+```{r}
+preparar_secuencia <- function(secuencia, tipo = "ADN", mayusculas = TRUE) {
+  if (mayusculas) {
+    secuencia <- toupper(secuencia)
+  }
+  
+  if (tipo == "ARN") {
+    secuencia <- chartr("T", "U", secuencia)
+  }
+  
+  secuencia
+}
+
+preparar_secuencia("atgcgt")
+preparar_secuencia("atgcgt", tipo = "ARN")
+preparar_secuencia("atgcgt", mayusculas = FALSE)
+preparar_secuencia("atgcgt", tipo = "ARN", mayusculas = TRUE)
+```
+
+### 5.3 Devolver varios resultados mediante una lista
+
+Supongamos que queremos resumir una secuencia de ADN mediante su identificador, longitud y número de nucleótidos `G` y `C`.
+
+```{r}
+resumir_adn <- function(id, secuencia) {
+  secuencia <- toupper(secuencia)
+  bases <- strsplit(secuencia, split = "", fixed = TRUE)[[1]]
+  
+  list(
+    id = id,
+    longitud = nchar(secuencia),
+    conteo_gc = sum(bases %in% c("G", "C"))
+  )
+}
+
+resultado <- resumir_adn("GEN_01", "ATGCGTAA")
+resultado 
+
+resultado$id
+resultado[["longitud"]]
+```
+
+## **Ejercicio 2: Función 2**
+
+Modifica `resumir_adn()` para que también devuelva la proporción de nucleótidos `G` y `C` respecto de la longitud total. Prueba la función con una secuencia no vacía.
+
+```{r}
+resumir_adn <- function(id, secuencia) {
+  secuencia <- toupper(secuencia)
+  bases <- strsplit(secuencia, "", fixed = TRUE)[[1]]
+  longitud <- nchar(secuencia)
+  conteo_gc <- sum(bases %in% c("G", "C")) 
+  proporcion_gc <- conteo_gc/longitud
+  
+  list(
+    id = id,
+    longitud = longitud,
+    conteo_gc = conteo_gc,
+    proporcion_gc = proporcion_gc
+  )
+}
+
+resumir_adn("GEN_01", "ATGCGTAA")
+```
+
+### 5.4 Validar argumentos: `stop()` y `stopifnot()`
+
+```{r}
+validar_adn <- function(secuencia) {
+  if (!is.character(secuencia) ||
+      length(secuencia) != 1 ||
+      is.na(secuencia) ||
+      !grepl("^[ACGT]+$", toupper(secuencia))) {
+    stop("Se requiere una secuencia no vacía con bases A, C, G o T.")
+  }
+  
+  TRUE
+}
+
+validar_adn("ATGCGT")
+# validar_adn("ATNG")  # Error: contiene N
+# validar_adn(1234)    # Error: no es texto
+```
+
+En esta función, `^[ACGT]+$` es una **expresión regular**: exige que todos los caracteres sean `A`, `C`, `G` o `T`, y que exista al menos uno.
+
+```{r}
+longitud_validada <- function(secuencia) {
+  stopifnot(
+    is.character(secuencia),
+    length(secuencia) == 1,
+    !is.na(secuencia)
+  )
+  
+  nchar(secuencia)
+}
+
+
+longitud_validada("ATGCGT")
+```
+
+### 5.5 Combinar funciones y estructuras de control
+
+```{r}
+revisar_secuencias <- function(secuencias) {
+  # Creamos el vector de resultados lógico (FALSE) de longitud n
+  resultado <- logical(length(secuencias))
+  
+  for (i in seq_along(secuencias)) {
+    # Extraemos la secuencia i y la guardamos en secuencia temporalmente
+    secuencia <- secuencias[i]
+    
+    if (is.na(secuencia)) {
+      # si es vacía asignamos FALSE
+      resultado[i] <- FALSE
+    } else {
+      # si no es vacía, verificamos que silo contenga A, C, G o T
+      resultado[i] <- grepl("^[ACGT]+$", toupper(secuencia))
+    }
+  }
+  
+  resultado
+}
+
+secuencias <- c("ATGCGT", "ACNTGA", "ttacga", NA)
+revisar_secuencias(secuencias)
+```
+
+`logical(length(secuencias))` crea un vector lógico para almacenar los resultados, mientras que `seq_along(secuencias)` genera los índices necesarios para recorrer el vector.
+
+## **Ejercicio 3: Función 3**
+
+Crea una función llamada `clasificar_secuencias` que reciba un vector de secuencias y devuelva una lista con dos elementos:
+
+- `validas`: las secuencias formadas únicamente por `A`, `C`, `G` y `T`.
+
+- `invalidas`: las secuencias que contienen otros caracteres o valores faltantes.
+
+Utiliza la función `revisar_secuencias()` del ejemplo anterior.
+
+```{r}
+
+clasificar_secuencias <- function(secuencias) {
+  stopifnot(is.character(secuencias))
+  es_valida <- revisar_secuencias(secuencias)
+  
+  list(
+    validas = secuencias[es_valida],
+    invalidas = secuencias[!es_valida]
+  )
+}
+clasificar_secuencias(c("ATGCGT", "ACNTGA", "ttacga", NA))
+```
+
+## 5.6 Actividad Final
+
+Escribe una función `crearr_reporte_secuencias(ids, secuencias)` que:
+
+1.  Compruebe que ambos argumentos son vectores de caracteres y tienen la misma longitud.
+
+2.  Identifique las secuencias válidas mediante `revisar_secuencias()`.
+
+3.  Devuelva un `data.frame` con las columnas `id`, `secuencia`, `longitud` y `valida`.
+
+4.  Asigne `NA` a la longitud de las secuencias inválidas.
+
+```{r}
+ids <- c("seq_01", "seq_02", "seq_03", "seq_04")
+secuencias <- c("ATGCGT", "ACNTGA", "GGCCAA", "TTTAAA") 
+
+# creando funcion 
+crear_reporte_secuencias <- function(ids, secuencias) {
+  stopifnot(is.character(secuencias), 
+            length(ids) == length(secuencias))
+  longitud <- nchar(secuencias)
+  valida <- revisar_secuencias(secuencias)
+  longitud[!valida] <- NA
+  
+  data.frame(   
+    id = ids,
+    secuencia = secuencias, 
+    longitud = longitud, 
+    valida = valida
+    )
+} 
+
+crear_reporte_secuencias(ids, secuencias)
+```
+
+## 6  Scripts, paquetes y proyectos de RStudio
+
+## 6.5 Ejecutar y revisar un script completo
+
+Considera el siguiente código, guardado en un archivo llamado `revision.R`:
+
+```{r}
+# longitudes <- nchar(secuencias)
+# resultado <- data.frame(id = ids, longitud = longitudes)
+# print(resultado)
+```
+
+Un estudiante afirma que el archivo funciona porque obtuvo una tabla al ejecutarlo en su computadora.
+
+1.  ¿Por qué podría fallar si otra persona abre el archivo y lo ejecuta desde una sesión nueva de R?
+
+- Porque las demás personas no tienen las vectores definidos en su computadora. No tienen "secuencias", ni "ids".
+
+2.  ¿Cómo se puede modificar el script para que pueda ejecutarse completo sin depender de objetos creados previamente en la consola?
+
+- Creando una función que reciba los argumentos de ids y secuencias. Al final del script le damos los argumentos que queramos a la función y lo corremos.
+
+```{r}
+# codigo corregido con las especificaciones 
+
+revision <- function(ids, secuencias) {
+  longitudes <- nchar(secuencias)
+  resultado <- data.frame(
+    id = ids, 
+    longitud = longitudes
+  )
+  return(resultado)
+}
+
+revision(
+  c("seq_01", "seq_02", "seq_03", "seq_04"),
+  c("ATGCGT", "ACNTGA", "GGCCAA", "TTTAAA")
+)
+```
+
+### Análisis R 
+
+```{r}
+# --------------------------------------------------
+# Análisis básico de secuencias de ADN
+# Objetivo: revisar secuencias y resumir longitudes
+# --------------------------------------------------
+
+# 1. Datos de entrada
+muestras <- c("M01", "M02", "M03", "M04")
+secuencias <- c("ATGCCG", "ATNNGA", "GGCTTA", "ATG")
+
+# 2. Verificar que hay un identificador por secuencia
+stopifnot(length(muestras) == length(secuencias))
+
+# 3. Procesar los datos
+longitudes <- nchar(secuencias)
+secuencia_valida <- grepl("^[ACGT]+$", secuencias)
+
+# 4. Organizar y mostrar los resultados
+resumen <- data.frame(
+  muestra = muestras,
+  secuencia = secuencias,
+  longitud = longitudes,
+  valida = secuencia_valida
+)
+
+print(resumen)
+```
+
+# Clase 2 
+
+## 7  Importación y exploración de datos bioinformáticos en R
+
+#### 7.3.1 Directorios y archivos
+
+```{r, echo=FALSE}
+# Borramos memoria 
+rm(list = ls())
+knitr::opts_knit$set(root.dir = "/home/arobles/Intro_a_R")
+```
+
+```{r}
+# Directorio de trabajo actual
+getwd() 
+
+# listar los archivos de una carpeta 
+list.files("data_raw/datos_sesion_02_blast") 
+
+# verifica que un archivo exista 
+file.exists("data_raw/datos_sesion_02_blast/resultados_blast.tsv")
+
+# te da la informacion de un archivo 
+file.info("data_raw/datos_sesion_02_blast/resultados_blast.tsv")
+
+# nombra a un archivo y luego verifica que exista 
+archivo_blast <- "data_raw/datos_sesion_02_blast/resultados_blast.tsv"
+file.exists(archivo_blast) 
+```
+
+#### 7.3.2 Mirar el contenido sin importarlo todavía
+
+```{r}
+# cargamos librería 
+readLines(archivo_blast, n = 5) 
+```
+
+| **Extensión habitual** | **Contenido frecuente** | **Separador o estructura** |
+|:----------------------:|:----------------------:|:----------------------:|
+| `.csv` | Tabla | Comas, aunque depende de cómo se exportó |
+| `.tsv` | Tabla | Tabulaciones |
+| `.txt` | Texto o tabla | Depende del archivo |
+| `.fasta` / `.fa` | Secuencias | Encabezados `>` y líneas de secuencia |
+| `.gz` | Archivo comprimido | Depende del formato interno |
+
+## **Ejercicio 1: Reconocer un archivo antes de importarlo**
+
+Sin abrirlo en una hoja de cálculo, utiliza R para comprobar que existe `blast_separador_incorrecto.csv`, mostrar sus tres primeras líneas y determinar qué separador utiliza realmente.
+
+```{r}
+# mostrar que exista 
+file.exists("data_raw/datos_sesion_02_blast//blast_separador_incorrecto.csv") 
+
+# mostrar sus tres primeras lineas 
+readLines("data_raw/datos_sesion_02_blast/blast_separador_incorrecto.csv", n = 3) 
+
+# determinar el separador 
+readLines("data_raw/datos_sesion_02_blast/blast_separador_incorrecto.csv", n=1)
+```
+
+### 7.4 Importación de archivos tabulares
+
+### 7.4.1 CSV y TSV con R base
+
+```{r}
+blast <- read.delim("data_raw/datos_sesion_02_blast/resultados_blast.tsv")
+metadata <- read.csv("data_raw/datos_sesion_02_blast/metadata_secuencias.csv",
+                     colClasses = c(codigo_muestra = "character"))
+
+class(blast) 
+head(blast)
+head(metadata)
+```
+
+### 7.4.2 Importación con `readr`
+
+Da mensajes sobre los tipos de columnas y herramientas para detectar problemas de lectura.
+
+```{r}
+blast <- readr::read_tsv(
+  "data_raw/datos_sesion_02_blast/resultados_blast.tsv",
+  show_col_types = FALSE
+)
+
+metadata <- readr::read_csv(
+  "data_raw/datos_sesion_02_blast/metadata_secuencias.csv",
+  col_types = readr::cols(codigo_muestra = readr::col_character()),
+  show_col_types = FALSE
+) 
+
+class(blast)
+class(metadata)
+
+```
+
+Para consultar posteriormente los tipos de datos detectados, se puede utilizar `readr::spec(blast)`.
+
+|   **R base**   |  **`readr`**   |               **Uso**               |
+|:--------------:|:--------------:|:-----------------------------------:|
+|  `read.csv()`  |  `read_csv()`  |    Archivos separados por comas     |
+| `read.delim()` |  `read_tsv()`  | Archivos separados por tabulaciones |
+| `read.table()` | `read_delim()` | Archivos con separador configurable |
+
+### 7.4.3 Encabezados, comentarios y valores faltantes
+
+```{r}
+readLines("data_raw/datos_sesion_02_blast/blast_comentarios.tsv", n = 4)
+
+blast_con_comentarios <- readr::read_tsv(
+  "data_raw/datos_sesion_02_blast/blast_comentarios.tsv",
+  comment = "#",
+  show_col_types = FALSE
+)
+
+head(blast_con_comentarios)
+
+# agregamos función para saber si tiene NA
+blast_na <- readr::read_tsv(
+  "data_raw/datos_sesion_02_blast/blast_valores_faltantes.tsv",
+  na = c("", "NA"),
+  show_col_types = FALSE
+)
+anyNA(blast_na)
+```
+
+### 7.4.4 Problemas al interpretar columnas
+
+```{r}
+# consultar la estructura de un objeto en R 
+str(blast) 
+
+# consultar las especificaciones de las columnas 
+readr::spec(blast) 
+
+# identificar problemas detectados durante la importación de los datos
+readr::problems(blast)
+```
+
+Para observar cómo funciona `problems()` cuando se detectan errores de importación:
+
+```{r}
+# cargamos readr 
+library(readr)
+
+# # Simulamos el contenido de un archivo TSV
+blast_error <- read_tsv(
+  I("secuencia\tidentidad
+seq1\t98.5
+seq2\t95.2
+seq3\terror
+seq4\t99.1"),
+  col_types = cols(
+    secuencia = col_character(),
+    identidad = col_double()
+    )
+)
+
+# # Revisamos los datos importados 
+blast_error
+
+# # Consultamos los problemas de importación 
+problems(blast_error)
+```
+
+## **Ejercicio 2: Elegir la función adecuada**
+
+Importa `metadata_secuencias.csv` y `blast_comentarios.tsv` utilizando `readr`. Conserva `codigo_muestra` como texto. Comprueba la clase de cada objeto y muestra sus primeras filas.
+
+```{r}
+blast <- readr::read_tsv(
+  "data_raw/datos_sesion_02_blast/resultados_blast.tsv",
+  show_col_types = FALSE
+)
+
+metadata <- readr::read_csv(
+  "data_raw/datos_sesion_02_blast/metadata_secuencias.csv",
+  col_types = readr::cols(codigo_muestra = readr::col_character()),
+  show_col_types = FALSE
+) 
+
+class(blast)
+class(metadata)
+head(blast)
+head(metadata)
+```
+
+### 7.5 Explorar el contenido de una tabla
+
+### 7.5.1 Dimensiones, nombres y tipos
+
+```{r}
+dim(blast)       # Filas y columnas 
+
+nrow(blast)      # Número de filas
+
+ncol(blast)      # Número de columnas
+
+names(blast)     # Nombres de columnas
+
+head(blast, 4)   # Primeras cuatro filas
+
+tail(blast, 3)   # Últimas tres filas
+
+str(blast)       # Estructura y tipos
+
+summary(blast)   # Resumen por columna
+```
+
+### 7.5.2 Seleccionar columnas y filas
+
+```{r}
+blast$query_id # Una columna  
+
+blast[, c("query_id", "pident")]
+
+blast[1:5, ] # Primeras cinco filas 
+
+blast[blast$query_id == "seq01", ] # solo las columnas con seq01 
+
+blast[blast$pident >= 90, ] # solo columnas con pident mayor o igual a 90 
+```
+
+### 7.5.3 Valores únicos y frecuencias
+
+```{r}
+# convertir a valores unicos 
+unique(blast$query_id) 
+
+# vuelve unicos los valores de una fila y mide longitud 
+length(unique(blast$query_id)) 
+
+# tabla 
+table(blast$query_id) 
+
+# los ordena de forma decresciente 
+sort(table(blast$query_id), decreasing = TRUE) 
+```
+
+### 7.5.4 Preguntas que podemos responder
+
+```{r}
+# suma los NA en cada columna  
+colSums(is.na(blast)) 
+
+# pregunta si hay NA 
+anyNA(blast) 
+```
+
+## **Ejercicio 3: Explorar resultados tipo BLAST**
+
+Con `resultados_blast.tsv`, responde mediante código:
+
+1.  ¿Cuántos registros y columnas tiene la tabla?
+
+2.  ¿Cuántos `query_id` diferentes aparecen?
+
+3.  ¿Cuántos resultados tiene cada consulta?
+
+4.  ¿Qué filas tienen `pident` mayor o igual a 95?
+
+5.  ¿Hay valores faltantes?
+
+```{r}
+# 1. 
+
+ncol(blast)
+nrow(blast)
+
+# 2. 
+length(unique(blast$query_id)) 
+
+# 3. 
+table(blast$query_id)
+
+# 3. 
+blast[(blast$pident) >= 95, ] 
+which(blast$pident >= 95)
+
+# 4. 
+anyNA(blast) 
+```
+
+### 7.6.1 Separador equivocado
+
+```{r}
+ruta <- "data_raw/datos_sesion_02_blast/blast_separador_incorrecto.csv"
+mal <- readr::read_csv(ruta, show_col_types = FALSE)
+names(mal) 
+
+bien <- readr::read_tsv(ruta, show_col_types = FALSE)
+names(bien)
+```
+
+### 7.6.2 Identificadores que parecen números
+
+```{r}
+metadata <- readr::read_csv(
+  "data_raw/datos_sesion_02_blast/metadata_secuencias.csv",
+  col_types = readr::cols(codigo_muestra = readr::col_character()),
+  show_col_types = FALSE
+)
+metadata$codigo_muestra
+```
+
+### 7.6.3 Ausencias y registros repetidos
+
+```{r}
+blast_na <- readr::read_tsv(
+  "data_raw/datos_sesion_02_blast/blast_valores_faltantes.tsv",
+  show_col_types = FALSE
+)
+colSums(is.na(blast_na))
+
+# para ver si hay duplicados 
+anyDuplicated(blast_na)
+anyDuplicated(blast_na$query_id) 
+```
+
+## **Ejercicio 4: Detectar un problema de lectura**
+
+Un estudiante importa `blast_separador_incorrecto.csv` con `read_csv()` y obtiene una sola columna. ¿Significa que el archivo contiene una única variable? Explica cómo comprobarlo y corrige la importación.
+
+```{r}
+# comprobamos 
+readLines("data_raw/datos_sesion_02_blast/blast_separador_incorrecto.csv", n=3) 
+
+# corregimos 
+blast_cor <- read_delim(
+  "data_raw/datos_sesion_02_blast/blast_separador_incorrecto.csv", 
+  delim = "\t",
+  show_col_types = FALSE) 
+
+head(blast_cor)
+```
+
+Lo comprobamos al usar "readLines", que muestra que no hay una sola variable, sino que el delimitador es el tabulador "\t" y por ello los agrupa read_csv. Para corregirlo debemos utilizar "read_delim" para indicar el delimitador correcto.
+
+### 7.7 Una mirada breve a FASTA desde R
+
+```{r}
+lineas <- readLines("data_raw/datos_sesion_02_blast/secuencias.fasta")
+head(lineas, 6)
+
+# localizar con grep 
+encabezados <- grep("^>", lineas, value = TRUE)
+encabezados
+
+# tamaño 
+length(encabezados) 
+```
+
+## **Ejercicio 5: Reconocer secuencias en FASTA**
+
+Utiliza `readLines()` y `grep()` para identificar los encabezados de `secuencias.fasta`. ¿Cuántas entradas FASTA contiene el archivo? Muestra únicamente sus encabezados.
+
+```{r}
+sec_lineas <- readLines("data_raw/datos_sesion_02_blast/secuencias.fasta") 
+encabezado <- grep("^>", sec_lineas, value = TRUE) 
+encabezado
+length(encabezado)
+```
+
+# Clase 3 
+
+### 8  Manipulación y transformación de datos bioinformáticos con dplyr y tidyr
+
+### 8.2 Archivos y preparación
+
+```{r}
+rm(list = ls())
+# install.packages(c("readr", "dplyr", "tidyr", "tibble")) 
+knitr::opts_knit$set(root.dir = "/home/arobles/Intro_a_R")
+```
+
+```{r}
+# librerias 
+library(readr) 
+library(dplyr) 
+library(tidyr) 
+library(tibble) 
+getwd() 
+```
+
+```{r}
+ruta_blast <- "data_raw/datos_sesion_02_blast/resultados_blast.tsv"
+ruta_conteos <- "data_raw/datos_sesion_03_dplyr/conteos_genes.csv"
+stopifnot(file.exists(ruta_blast), file.exists(ruta_conteos))
+
+blast <- read_tsv(ruta_blast, show_col_types = FALSE)
+conteos <- read_csv(ruta_conteos, show_col_types = FALSE)
+
+glimpse(blast) 
+glimpse(conteos) 
+```
+
+| **Función** | **¿Qué muestra?** |
+|:----------------------------------:|:----------------------------------:|
+| `head()` | Las primeras 6 filas del conjunto de datos, en forma de tabla. |
+| `glimpse()` | El número de filas y columnas, los nombres de las variables, sus tipos de datos y algunos valores. |
+| `str()` | La estructura interna del objeto en R, incluyendo tipos de datos y una vista de su contenido. |
+
+### 8.3.1 ¿Qué es un `tibble`
+
+```{r}
+class(blast) 
+class(as.data.frame(blast))
+```
+
+Contruir tablas pequeñas
+
+```{r}
+ejemplo <- tibble(
+  secuencia = c("seq01", "seq02", "seq03"),
+  longitud = c(150, 230, 180),
+  grupo = c("A", "B", "A")
+)
+ejemplo 
+```
+
+```{r}
+# escribimos la tabla por filas 
+ejemplo2 <- tribble(
+  ~secuencia, ~longitud, ~grupo,
+  "seq01",    150,       "A",
+  "seq02",    230,       "B",
+  "seq03",    180,       "A"
+)
+ejemplo2
+```
+
+### 8.3.2 Paquete `dplyr`
+
+### 8.3.3 El operador `%>%`
+
+```{r}
+# Sin pipes, una operación puede requerir objetos intermedios: 
+filtrados <- filter(blast, pident >= 90)
+seleccionados <- select(filtrados, query_id, subject_id, pident, bitscore)
+ordenados <- arrange(seleccionados, desc(bitscore))
+head(ordenados)
+```
+
+```{r}
+# Con %>%, la misma secuencia se lee de arriba hacia abajo: 
+blast %>%
+  filter(pident >= 90) %>%
+  select(query_id, subject_id, pident, bitscore) %>%
+  arrange(desc(bitscore)) 
+```
+
+### 8.4.1 `select()`: elegir columnas
+
+```{r}
+# Ciertas columnas 
+blast %>%
+  select(query_id, subject_id, pident) 
+
+# Todas las columnas excepto evalue 
+blast %>%
+  select(-evalue)  
+
+# starts_with 
+blast %>% 
+  select(starts_with("query"), pident, bitscore) 
+```
+
+### 8.4.2 `filter()`: elegir filas
+
+```{r}
+# pident 
+blast %>% 
+  filter(pident >= 90) 
+
+# filtrar por pident y longitud 
+blast %>% 
+  filter(pident >= 90, length >= 150) 
+
+# filtrar por ciertas columns de query_id 
+blast %>% 
+  filter(query_id == "seq01" | query_id == "seq02") 
+
+# filtrar por ciertas columns 
+blast %>% 
+  filter(query_id %in% c("seq01", "seq03", "seq05")) 
+```
+
+### 8.4.3 `arrange()`: ordenar registros
+
+```{r}
+blast %>% arrange(bitscore)         # Menor a mayor 
+blast %>% arrange(desc(bitscore))   # Mayor a menor
+blast %>% arrange(query_id, desc(bitscore)) 
+```
+
+### 8.4.4 `rename()`: cambiar nombres de columnas
+
+```{r}
+blast %>%
+  rename(
+    identidad_porcentaje = pident,
+    longitud_alineamiento = length
+  ) %>%
+  select(query_id, identidad_porcentaje, longitud_alineamiento) 
+```
+
+### 8.4.5 `distinct()`: identificar combinaciones únicas
+
+```{r}
+blast %>% distinct(query_id) 
+blast %>% distinct(query_id, subject_id)
+```
+
+### 8.5 Crear y modificar columnas con `mutate()`
+
+```{r}
+blast %>%
+  mutate(
+    identidad_proporcion = pident / 100,
+    longitud_kb = length / 1000
+  ) %>%
+  select(query_id, pident, identidad_proporcion, length, longitud_kb) 
+```
+
+### 8.5.1 Columnas lógicas e `if_else()`
+
+```{r}
+blast %>%
+  mutate(
+    supera_90 = pident >= 90,
+    etiqueta = if_else(pident >= 90, "90 o más", "Menos de 90")
+  ) %>%
+  select(query_id, pident, supera_90, etiqueta) 
+```
+
+### 8.5.2 Más de dos categorías con `case_when()`
+
+```{r}
+blast %>%
+  mutate(
+    grupo_didactico = case_when(
+      pident >= 95 ~ "Grupo A",
+      pident >= 80 ~ "Grupo B",
+      TRUE ~ "Grupo C"
+    )
+  ) %>%
+  count(grupo_didactico) 
+```
+
+### 8.5.3 Valores faltantes
+
+```{r}
+tibble(valor = c(92, NA, 76)) %>%
+  mutate(
+    falta = is.na(valor),
+    etiqueta = case_when(
+      is.na(valor) ~ "Sin dato",
+      valor >= 90 ~ "90 o más",
+      TRUE ~ "Menos de 90"
+    )
+  ) 
+```
+
+### 8.6.1 Contar registros con `count()`
+
+```{r}
+blast %>% count(query_id) 
+blast %>% count(query_id, sort = TRUE)  
+```
+
+`count(query_id)` es una forma abreviada de `group_by(query_id) %>% summarise(n = n())`
+
+### 8.6.2 `group_by()` y `summarise()`
+
+`group_by()` establece los grupos sobre los que operarán las funciones posteriores. `summarise()` crea **una fila por grupo** cuando cada resumen devuelve un valor.
+
+```{r}
+resumen <- blast %>%
+  group_by(query_id) %>%
+  summarise(
+    numero_alineamientos = n(),
+    referencias_distintas = n_distinct(subject_id),
+    bitscore_maximo = max(bitscore),
+    identidad_promedio = mean(pident),
+    .groups = "drop"
+  )
+resumen 
+```
+
+`.groups = "drop"` elimina la agrupación al terminar el resumen.
+
+### 8.6.3 Diferencia entre `mutate()` y `summarise()`
+
+Con `mutate()` podemos agregar a **cada fila** información calculada para su grupo:
+
+```{r}
+blast %>%
+  group_by(query_id) %>%
+  mutate(alineamientos_por_consulta = n()) %>%
+  ungroup() %>%
+  select(query_id, subject_id, alineamientos_por_consulta) 
+```
+
+Con `summarise()`, en cambio, obtenemos una fila por consulta:
+
+```{r}
+blast %>%
+  group_by(query_id) %>%
+  summarise(alineamientos_por_consulta = n(), .groups = "drop") 
+```
+
+`ungroup()` es útil después de `mutate()` cuando ya no necesitamos conservar el agrupamiento para operaciones posteriores.
+
+La función `ungroup()` permite eliminar las agrupaciones establecidas previamente con `group_by()`.
+
+### 8.6.4 Elegir una fila por grupo: un criterio explícito
+
+```{r}
+blast %>%
+  group_by(query_id) %>%
+  slice_max(order_by = bitscore, n = 1, with_ties = FALSE) %>%
+  ungroup() 
+```
+
+`with_ties = FALSE` garantiza una sola fila por grupo si existen empates.
+
+### 8.7 Reorganizar tablas con `tidyr`
+
+### 8.7.2 `pivot_longer()`: de ancho a largo
+
+```{r}
+conteos_largos <- conteos %>%
+  pivot_longer(
+    cols = starts_with("muestra_"),
+    names_to = "muestra",
+    values_to = "conteo"
+  )
+conteos_largos
+```
+
+La columna `muestra` contiene los nombres que antes eran encabezados, mientras que `conteo` reúne los valores numéricos.
+
+```{r}
+# agrupar por muestra
+conteos_largos %>%
+  group_by(muestra) %>%
+  summarise(
+    total_conteos = sum(conteo),
+    genes_registrados = n(),
+    .groups = "drop"
+  ) 
+```
+
+### 8.7.3 `pivot_wider()`: de largo a ancho
+
+```{r}
+conteos_recuperados <- conteos_largos %>%
+  pivot_wider(
+    names_from = muestra,
+    values_from = conteo
+  )
+conteos_recuperados 
+```
+
+```{r}
+# cargar librerias 
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+```{r}
+conteos_ejemplo <- tibble::tribble(
+  ~gen,    ~muestra_A, ~muestra_B, ~muestra_C,
+  "gen01", 120,        90,         150,
+  "gen02", 45,         70,          38,
+  "gen03", 200,       180,         210
+)
+
+conteos_largos <- conteos_ejemplo %>%
+  pivot_longer(
+    cols = starts_with("muestra_"),
+    names_to = "muestra",
+    values_to = "conteo"
+  )
+
+conteos_largos 
+```
+
+### 8.9.1 Guardar resultados sin sobrescribir los datos originales
+
+La idea es separar los datos originales (`data_raw/`) de las tablas generadas durante el análisis (`results/`).
+
+```{r}
+if (!dir.exists("results")) dir.create("results")
+
+readr::write_csv(resumen, "results/03_resumen_blast.csv")
+readr::write_tsv(conteos_largos, "results/03_conteos_largos.tsv") 
+```
+
+```{r}
+# comprobar si existe 
+file.exists("results/03_resumen_blast.csv")
+file.exists("results/03_conteos_largos.tsv") 
+```
+
+## 8.10 Ejercicios
+
+```{r}
+library(readr)
+library(dplyr)
+
+datos <- read_csv(
+  "data_raw/expresion_genica_estres.csv",
+  show_col_types = FALSE
+)
+
+glimpse(datos) 
+view(datos)
+```
+
+## 8.10.1 Ejercicio 1. Identificación de genes candidatos
+
+Queremos explorar qué genes podrían estar relacionados con la respuesta bacteriana al estrés. Utilizando `dplyr`:
+
+1.  Calcula el conteo promedio de cada gen en cada condición experimental.
+
+2.  Organiza los resultados de manera que puedas comparar los promedios de Control y Estrés para cada gen.
+
+3.  Calcula la razón entre el promedio en Estrés y el promedio en Control.
+
+4.  Identifica los cinco genes con mayor aumento relativo y muestra su anotación funcional.
+
+```{r}
+# 1. conteo promedio 
+resumen11 <- datos %>%
+  group_by(gene_id, condicion) %>%
+  summarise(
+    promedio = mean(conteo)
+  )
+
+resumen11
+
+# 2. organizar resultados 
+resumen11 %>%
+  group_by(condicion) %>%
+  arrange(desc(promedio))   # Mayor a meno
+
+resumen11
+
+# 3. calculamos razon 
+razon1 <- datos %>%
+  group_by(gene_id, condicion, funcion) %>%
+  summarise(promedio = mean(conteo), .groups = "drop") %>%
+  tidyr::pivot_wider(names_from = condicion, values_from = promedio) %>%
+  mutate(razon = Estres / Control)
+
+print(razon1)
+
+# 4. Identificar los 5 genes con mayor aumento relativo y mostrar anotación 
+top5_genes <- razon1 %>%
+  slice_max(order_by = razon, n = 5)
+
+print(top5_genes) 
+```
+
+**Pregunta de interpretación:** ¿Un gen con un aumento relativo grande necesariamente presenta un conteo alto de lecturas? Justifica tu respuesta.
+
+Respuesta: No necesariamente. Un gen con conteos bajos en control se puede multipplocar varias veces y tener una razón alta en Estrés sin tener un número alto en lecturas totales.
+
+## 8.10.3 TAREA. ¿Qué genes destacan dentro de cada muestra?
+
+En un experimento de expresión génica, algunos genes pueden presentar conteos considerablemente mayores que otros dentro de una misma muestra.
+
+Queremos identificar los genes cuyos conteos superan el promedio de su propia muestra.
+
+Utilizando `dplyr`:
+
+1.  Calcula el conteo promedio de los genes en cada muestra.
+
+2.  Agrega a la tabla original una columna llamada `promedio_muestra` que contenga ese promedio para cada observación, **sin eliminar ninguna fila**.
+
+3.  Identifica los genes cuyo conteo sea al menos el doble del promedio de su muestra.
+
+4.  Calcula cuántos genes cumplen esta condición en cada muestra y compara los resultados entre Control y Estrés.
+
+```{r, warning=FALSE}
+datos <- read_csv(
+  "data_raw/expresion_genica_estres.csv",
+  show_col_types = FALSE
+)
+
+resultado <- datos %>%
+  group_by(sample_id) %>%
+  mutate(
+    promedio_muestra = mean(conteo),         
+    genes_destacados = conteo >= 2 * promedio_muestra    
+  ) %>% 
+  ungroup %>% 
+  group_by(condicion, sample_id) %>%
+  summarise(n_genes = sum(genes_destacados),         
+            .groups = "drop")
+
+resultado
+```
+
+**Pregunta de interpretación:** ¿Por qué es más adecuado comparar cada gen con el promedio de su propia muestra en lugar de utilizar un único promedio calculado con todas las muestras?
+
+- porque cada muestra tiene un total de conteos bastante distinto, que puede ser representado si comparamos cada gen con el promedio de su propia muestra. Si en cambio utilizamos un único promedio global, se sobreestimaría los genes que destacan en las muestras con más lecturas.
+
+### Ejemplo: promedio de mediciones por especie y tratamiento
+
+```{r}
+# creamos los datos 
+library(dplyr)
+
+datos <- tibble(
+  especie = c("A", "A", "A", "A", "B", "B", "B", "B"),
+  tratamiento = c("Control", "Control", "Tratado", "Tratado",
+                  "Control", "Control", "Tratado", "Tratado"),
+  valor = c(10, 20, 30, 40, 50, 60, 70, 80)
+)
+
+datos 
+```
+
+Queremos calcular el promedio de las mediciones para cada combinación de especie y tratamiento.
+
+Para ello, agrupamos utilizando las dos variables:
+
+```{r}
+datos %>%
+group_by(especie, tratamiento) 
+```
+
+### Caso 1. Sin utilizar `.groups = "drop"`
+
+```{r}
+# calculamos promedio de cada grupo 
+resumen1 <- datos %>%
+  group_by(especie, tratamiento) %>%
+  summarise(
+    promedio = mean(valor)
+  ) 
+resumen1 
+```
+
+Esto significa que, aunque ya calculamos los promedios para cada combinación de especie y tratamiento, **la tabla continúa agrupada por especie**.
+
+```{r}
+# porque primero se agrupó por especie 
+# group_by(especie, tratamiento)
+
+# comprobar cuáles son las variables de agrupación mediante: 
+group_vars(resumen1)
+```
+
+Supongamos que ahora queremos calcular el promedio de la columna `promedio`:
+
+```{r}
+resumen1 %>%
+  summarise(
+    media = mean(promedio)
+  ) 
+```
+
+### Caso 2. Utilizando `.groups = "drop"`
+
+Ahora repetimos el cálculo inicial, pero agregamos `.groups = "drop"`:
+
+```{r}
+resumen2 <- datos %>%
+  group_by(especie, tratamiento) %>%
+  summarise(
+    promedio = mean(valor),
+    .groups = "drop"
+  )
+
+resumen2 
+
+# comprobamos 
+group_vars(resumen2) 
+```
+
+**¿Qué sucede si realizamos el mismo segundo cálculo?**
+
+```{r}
+resumen2 %>%
+  summarise(
+    media = mean(promedio)
+  )
+```
+
+### Comparación de los resultados
+
+```{r}
+# Sin eliminar las agrupaciones
+resumen1 %>%
+  summarise(
+    media = mean(promedio)
+  ) 
+
+# Eliminando las agrupaciones
+resumen2 %>%
+  summarise(
+    media = mean(promedio)
+  )
+```
+
+- `group_by()` establece cómo se agrupan las observaciones.
+
+- `summarise()` calcula un resumen para cada grupo.
+
+- Si agrupamos por varias variables, `summarise()` puede conservar parte de la agrupación original.
+
+- `.groups = "drop"` elimina todas las agrupaciones después de calcular el resumen.
+
+- Eliminar las agrupaciones **no modifica los valores ni elimina filas o columnas**; únicamente cambia cómo se comportarán las operaciones posteriores.
+
+**Recomendación:** cuando ya no necesitemos conservar las agrupaciones, es conveniente utilizar `.groups = "drop"` para evitar que los cálculos posteriores se realicen por grupos de manera inesperada.
+
+```{r}
+# Si agrupamos por una sola variable, por ejemplo: 
+datos %>%
+  group_by(especie) %>%
+  summarise(promedio = mean(valor)) 
+```
+
+# Clase 4 
+
+```{r}
+# Integración de datos y automatización de análisis en R -------------------
+
+
+library(dplyr)
+library(readr)
+library(purrr)
+getwd()
+
+carpeta_datos <- "~/Intro_a_R/data_raw/datos_sesion_04_integracion"
+carpeta_blast <- file.path(carpeta_datos, "blast_muestras")
+
+if (!dir.exists("results")) {
+  dir.create("results")
+}
+
+blast_A <- read_tsv(
+  file.path(carpeta_blast, "muestra_A.tsv"),
+  show_col_types = FALSE
+)
+
+metadata <- read_csv(
+  file.path(carpeta_datos, "metadata_secuencias.csv"),
+  col_types = cols(codigo_muestra = col_character(), .default = col_guess())
+)
+
+head(blast_A)
+
+# Integración de datos y automatización de análisis en R -------------------
+
+
+library(dplyr)
+library(readr)
+library(purrr)
+getwd()
+
+carpeta_datos <- "data_raw/datos_sesion_04_integracion"
+carpeta_blast <- file.path(carpeta_datos, "blast_muestras")
+
+if (!dir.exists("results")) {
+  dir.create("results")
+}
+
+blast_A <- read_tsv(
+  file.path(carpeta_blast, "muestra_A.tsv"),
+  show_col_types = FALSE
+)
+
+metadata <- read_csv(
+  file.path(carpeta_datos, "metadata_secuencias.csv"),
+  col_types = cols(codigo_muestra = col_character(), .default = col_guess())
+)
+
+head(blast_A)
+head(metadata)
+
+
+blast_A_con_metadata <- blast_A %>%
+  left_join(metadata, by = "query_id")
+
+blast_A_con_metadata %>%
+  select(query_id, subject_id, pident, organismo, origen) %>%
+  head()
+
+blast_B <- read_tsv(
+  file.path(carpeta_blast, "muestra_B.tsv"),
+  show_col_types = FALSE
+)
+
+blast_C <- read_tsv(
+  file.path(carpeta_blast, "muestra_C.tsv"),
+  show_col_types = FALSE
+)
+
+nrow(blast_C)
+
+
+
+blast_C %>%
+  inner_join(metadata, by = "query_id") %>%
+  nrow()
+
+
+blast_C %>%
+  anti_join(metadata, by = "query_id")
+
+
+# 9.4.4 full_join(): conservar las filas de ambas tablas ------------------
+
+blast_C %>%
+  full_join(metadata, by = "query_id") %>%
+  select(query_id, subject_id, organismo) %>%
+  arrange(query_id)
+blast_C %>%
+full_join(metadata, by = "query_id") %>%
+  select(query_id, subject_id, organismo) %>%
+  arrange(query_id)
+
+
+
+blast_total <- bind_rows(
+  muestra_A = blast_A,
+  muestra_B = blast_B,
+  muestra_C = blast_C,
+  .id = "muestra"
+)
+
+blast_total %>%
+  count(muestra)  
+
+blast_total 
+
+## 9.7.1 Importar e inspeccionar
+
+carpeta_rizosfera <- "data_raw/datos_rizosfera"
+
+conteos_riz <- read_tsv(
+  file.path(carpeta_rizosfera, "conteos_taxonomia_rizosfera.tsv"),
+  show_col_types = FALSE
+)
+
+head(conteos_riz)
+
+
+metadata_riz <- read_csv(
+  file.path(carpeta_rizosfera, "metadata_rizosfera.csv"),
+  show_col_types = FALSE
+)
+head(metadata_riz)
+
+dim(conteos_riz)
+
+host <- metadata_riz %>% 
+  count(host_name, sort = TRUE)
+host
+
+
+niveles <- c(
+  "kingdom", "phylum", "class", "order",
+  "family", "genus", "species"
+)
+
+conteos_limpios <- conteos_riz %>%
+  mutate(
+    across(
+      all_of(niveles),
+      ~ na_if(sub("^[a-z]__", "", .x), "")
+    )
+  )
+
+conteos_limpios %>%
+  select(taxon_id, all_of(niveles)) %>%
+  head()  
+
+library(tidyr)
+
+
+ids_muestras <- metadata_riz$sample_id
+
+stopifnot(
+  !anyDuplicated(ids_muestras),
+  all(ids_muestras %in% names(conteos_limpios))
+)
+
+conteos_largos <- conteos_limpios %>%
+  pivot_longer(
+    cols = all_of(ids_muestras),
+    names_to = "sample_id",
+    values_to = "conteo"
+  )
+
+datos_riz <- conteos_largos %>%
+  left_join(
+    metadata_riz %>% select(sample_id, host_name, country, year),
+    by = "sample_id",
+    relationship = "many-to-one"
+  )
+
+glimpse(datos_riz) 
+View(datos_riz)
+
+
+totales <- datos_riz %>% 
+  group_by(sample_id) %>% 
+  summarise(
+    total_lecturas = sum(conteo),
+    .groups = "drop"
+  )
+head(totales)
+
+write_tsv(totales, "results/totales")
+
+abundancias_genero <- datos_riz %>%
+  mutate(genus = if_else(is.na(genus), "Sin clasificar", genus)) %>%
+  group_by(sample_id, host_name, genus) %>%
+  summarise(conteo = sum(conteo), .groups = "drop") %>%
+  group_by(sample_id) %>%
+  mutate(abundancia_relativa = conteo / sum(conteo)) %>%
+  ungroup()
+
+abundancias_genero %>%
+  select(sample_id, host_name, genus, conteo, abundancia_relativa) 
+glimpse(abundancias_genero)
+
+
+
+generos_5 <- abundancias_genero %>%
+  mutate(
+    taxon_final = if_else(
+      genus != "Sin clasificar" & abundancia_relativa < 0.05,
+      "Otros",
+      genus
+    )
+  ) %>%
+  group_by(sample_id, host_name, taxon_final) %>%
+  summarise(
+    abundancia_relativa = sum(abundancia_relativa),
+    .groups = "drop"
+  )
+
+comprobar <- generos_5 %>%
+  group_by(sample_id) %>%
+  summarise(total = sum(abundancia_relativa))
+comprobar 
+
+### función 
+
+# Recibe los argumentos "tabla", el "nivel" que por default es genus, a menos 
+# que se especifique otro y el umbral "" 
+# agrupa las columnas descritas 
+preparar_abundancias <- function(tabla, nivel = "genus", umbral = 0.05) {
+  niveles_validos <- c(
+    "kingdom", "phylum", "class", "order",
+    "family", "genus", "species"
+  )
+  
+  # se detiene si el nivel no pertenece a los niveles_validos
+  # convierte el umbral a numerico y pide que su longitud sea de 1 
+  # que el umbral no tenga valores faltantes 
+  # y que el valor del umbral este entre 0 y 1 
+  stopifnot(
+    nivel %in% niveles_validos,
+    is.numeric(umbral), length(umbral) == 1,
+    !is.na(umbral), umbral >= 0, umbral <= 1
+  )
+  
+  # para cada nivel hay una etiqueta correspondiente 
+  etiqueta_otros <- if (nivel == "phylum") {
+    "Filos < 5%"
+  } else if (nivel == "genus") {
+    "Géneros < 5%"
+  } else {
+    "Taxones < 5%"
+  }
+  
+  # tomando "tabla" se le agrega una columna donde se extraiga los datos del nivel 
+  # si el taxon tiene valores faltantes se va hacia "Sin clasificar" 
+  tabla %>%
+    mutate(
+      taxon = .data[[nivel]],
+      taxon = if_else(is.na(taxon) | taxon == "",
+                      "Sin clasificar", taxon)
+      
+      # se agrupa por id, host_name y taxon 
+      # se suman los valores de conteoy se desagrupan 
+      # se agrupa por id 
+      # se crea una nueva columna con la abundancia relativa 
+      # se desagrupa y se crea columna con taxon_final. Si el umbral es menor a la 
+      # abundancia relativa se va a "otros" y si es mayor se va a "taxon" 
+    ) %>%
+    group_by(sample_id, host_name, taxon) %>%
+    summarise(conteo = sum(conteo), .groups = "drop") %>%
+    group_by(sample_id) %>%
+    mutate(abundancia_relativa = conteo / sum(conteo)) %>%
+    ungroup() %>%
+    mutate(
+      taxon_final = if_else(
+        abundancia_relativa < umbral,
+        etiqueta_otros,
+        taxon
+      )
+      
+      # se agrupa por id, host_name y taxon_final
+      # se suma la abundancia relativa 
+    ) %>%
+    group_by(sample_id, host_name, taxon_final) %>%
+    summarise(
+      abundancia_relativa = sum(abundancia_relativa),
+      .groups = "drop"
+    )
+}
+
+
+generos_5 <- preparar_abundancias(datos_riz, "genus", 0.05)
+filos_5 <- preparar_abundancias(datos_riz, "phylum", 0.05)
+familias_1 <- preparar_abundancias(datos_riz, "family", 0.01)
+
+
+write_tsv(generos_5, "results/generos_5.tsv")
+write_tsv(filos_5, "results/filos_5.tsv")
+write_tsv(familias_1, "results/familias_1.tsv")
+
+```
+
+# Clase 5 
+
+```{r}
+library(ggplot2)
+
+# EJERCICIO 1 
+# Metadatos originales
+metadata_riz <- read_csv(
+  "data_raw/datos_rizosfera/metadata_rizosfera.csv"
+)
+# 1. Buscar plantas con al menos 5 muestras
+plantas_top <- metadata_riz %>%
+  count(host_name) %>%
+  filter(n >= 5) %>%
+  pull(host_name)
+
+# 2. Filtrar los datos de géneros
+datos_ej1 <- generos_5 %>%
+  filter(host_name %in% plantas_top)
+
+# 3. Ordenar la leyenda poniendo "Géneros < 5%" al final
+orden_gen <- c(
+  sort(setdiff(unique(datos_ej1$taxon_final), "Géneros < 5%")),
+  "Géneros < 5%"
+)
+
+# 4. Hacer la gráfica
+ggplot(datos_ej1, aes(x = sample_id, y = abundancia_relativa, fill = taxon_final)) +
+  geom_col() +
+  scale_fill_viridis_d(breaks = orden_gen) +
+  scale_y_continuous(labels = scales::percent) +
+  facet_wrap(~ host_name, scales = "free_x") +
+  labs(
+    title = "Composición por género y planta hospedera",
+    x = "Muestra",
+    y = "Abundancia relativa",
+    fill = "Género"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, size = 6),
+    legend.position = "bottom"
+  )
+
+```
+
+```{r}
+# EJERCICIO 2 
+
+filos_5 <- read_tsv("results/filos_5.tsv")
+# 1. Buscar países con al menos 5 muestras
+paises_top <- metadata_riz %>%
+  count(country) %>%
+  filter(n >= 5) %>%
+  pull(country)
+
+# 2. Unir el país a filos_5 y filtrar
+datos_ej2 <- filos_5 %>%
+  left_join(metadata_riz %>% select(sample_id, country), by = "sample_id") %>%
+  filter(country %in% paises_top)
+
+# 3. Ordenar la leyenda poniendo "Filos < 5%" al final
+orden_fil <- c(
+  sort(setdiff(unique(datos_ej2$taxon_final), "Filos < 5%")),
+  "Filos < 5%"
+)
+
+# 4. Hacer la gráfica
+ggplot(datos_ej2, aes(x = sample_id, y = abundancia_relativa, fill = taxon_final)) +
+  geom_col() +
+  scale_fill_viridis_d(breaks = orden_fil) +
+  scale_y_continuous(labels = scales::percent) +
+  facet_wrap(~ country, scales = "free_x") +
+  labs(
+    title = "Composición por filo y país",
+    x = "Muestra",
+    y = "Abundancia relativa",
+    fill = "Filo"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, size = 6),
+    legend.position = "bottom"
+  )
+
+```
