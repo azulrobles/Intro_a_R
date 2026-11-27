@@ -1,12 +1,12 @@
 ---
 title: "entregables"
-format: html
+format: pdf
 editor: visual
 ---
 
-## Ejercicios completos 
+## Ejercicios completos
 
-# Clase 1 
+# Clase 1
 
 ## Introducción a R y organización de proyectos bioinformáticos
 
@@ -125,7 +125,7 @@ str(identificador)
 ### 3.2 Principales estructuras de datos en R
 
 | **Estructura** | **Dimensión** | **Homogeneidad** | **Ejemplo** | **Uso típico** |
-|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
+|:--:|:--:|:--:|:--:|:--:|
 | **Vector** | 1D | Homogénea (todos del mismo tipo) | `c(1,2,3)` | Secuencias simples de números, caracteres o lógicos |
 | **Lista** | 1D | Heterogénea (puede mezclar tipos) | `list(a=1:3, b="hola")` | Agrupar objetos distintos, resultados de modelos |
 | **Matriz** | 2D | Homogénea | `matrix(1:6, nrow=2)` | Cálculos numéricos, álgebra lineal |
@@ -281,7 +281,7 @@ fac
 ### 3.2.5 Resumen de tipos de objetos
 
 | **Estructura** | **Dimensiones** | **¿Elementos del mismo tipo?** | **Ejemplo de uso** |
-|:----------------:|:----------------:|:----------------:|:----------------:|
+|:--:|:--:|:--:|:--:|
 | Vector | 1 | Sí | Identificadores o longitudes |
 | Matriz | 2 | Sí | Conteos por gen y muestra |
 | Array | 2 o más | Sí | Datos multidimensionales |
@@ -320,7 +320,7 @@ print(info_lista)
 ### 3.3 Operadores
 
 | **Aritméticos** | **Comparación** | **Argumentos lógicos (Logical Operators)** |
-|:----------------------:|:----------------------:|:----------------------:|
+|:--:|:--:|:--:|
 | `+` Adición / suma | `<` Menor que | `!x` - Not x (logical NOT) |
 | `-` Sustracción / resta | `>` Mayor que | `x & y` OR `x AND y` - (logical AND) |
 | `*` Multiplicación | `<=` Menor o igual que | `x && y` - identico |
@@ -648,7 +648,7 @@ nchar(secuencia)
 ### 4.4 ¿Cuándo utilizar cada estructura?
 
 | **Estructura** | **¿Para qué sirve?** | **Ejemplo de aplicación** |
-|:----------------------:|:----------------------:|:----------------------:|
+|:--:|:--:|:--:|
 | `if` / `else` | Elegir entre alternativas a partir de una condición única. | Verificar si un conteo es válido. |
 | `ifelse()` | Clasificar elementos de un vector. | Etiquetar conteos positivos y ceros. |
 | `for` | Recorrer una colección de elementos. | Calcular la longitud de varias secuencias. |
@@ -941,7 +941,7 @@ revision(
 )
 ```
 
-### Análisis R 
+### Análisis R
 
 ```{r}
 # --------------------------------------------------
@@ -971,7 +971,7 @@ resumen <- data.frame(
 print(resumen)
 ```
 
-# Clase 2 
+# Clase 2
 
 ## 7  Importación y exploración de datos bioinformáticos en R
 
@@ -1009,7 +1009,7 @@ readLines(archivo_blast, n = 5)
 ```
 
 | **Extensión habitual** | **Contenido frecuente** | **Separador o estructura** |
-|:----------------------:|:----------------------:|:----------------------:|
+|:--:|:--:|:--:|
 | `.csv` | Tabla | Comas, aunque depende de cómo se exportó |
 | `.tsv` | Tabla | Tabulaciones |
 | `.txt` | Texto o tabla | Depende del archivo |
@@ -1333,7 +1333,7 @@ encabezado
 length(encabezado)
 ```
 
-# Clase 3 
+# Clase 3
 
 ### 8  Manipulación y transformación de datos bioinformáticos con dplyr y tidyr
 
@@ -1367,7 +1367,7 @@ glimpse(conteos)
 ```
 
 | **Función** | **¿Qué muestra?** |
-|:----------------------------------:|:----------------------------------:|
+|:--:|:--:|
 | `head()` | Las primeras 6 filas del conjunto de datos, en forma de tabla. |
 | `glimpse()` | El número de filas y columnas, los nombres de las variables, sus tipos de datos y algunos valores. |
 | `str()` | La estructura interna del objeto en R, incluyendo tipos de datos y una vista de su contenido. |
@@ -1898,7 +1898,7 @@ datos %>%
   summarise(promedio = mean(valor)) 
 ```
 
-# Clase 4 
+# Clase 4
 
 ```{r}
 # Integración de datos y automatización de análisis en R -------------------
@@ -2203,7 +2203,7 @@ write_tsv(familias_1, "results/familias_1.tsv")
 
 ```
 
-# Clase 5 
+# Clase 5
 
 ```{r}
 library(ggplot2)
