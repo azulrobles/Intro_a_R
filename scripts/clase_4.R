@@ -90,7 +90,7 @@ blast_C %>%
   full_join(metadata, by = "query_id") %>%
   select(query_id, subject_id, organismo) %>%
   arrange(query_id)
-# blast_C %>%
+blast_C %>%
   full_join(metadata, by = "query_id") %>%
   select(query_id, subject_id, organismo) %>%
   arrange(query_id)
